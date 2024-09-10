@@ -4,8 +4,11 @@ type RunType = "MANUAL" | "SCHEDULED";
 type RunStatus = "PASS" | "FAIL" | "ERROR";
 type RunState = "RUNNING" | "AT REST";
 
-export interface TestSchema {
-    docType: "TEST",
+// === Test Run Schema ===
+
+export interface TestRunSchema {
+    docType: "TEST_RUN",
+
     runId: ObjectId,
     runType: RunType,
     startTime: Date, 
@@ -17,10 +20,12 @@ export interface TestSchema {
 // NOTE: The dashboard document has an _id of 1
 export interface DashboardSchema {
 	docType: "DASHBOARD",
-	runType: RunType,
+
+	// Information for the latest test run
 	runId: ObjectId,
+	runType: RunType,
 	startTime: Date,
-	latestTests: LatestTestRun[],
+	latestTests: LatestTestRunFile[],
 
     // Information about initiating a manual run
 	manualRun: {
@@ -45,33 +50,41 @@ export interface DashboardSchema {
 	}
 }
 
-export interface LatestTestRun {
+// Information about a test file in the latest test run displayed on the
+// dashboard
+export interface LatestTestRunFile {
     name: string,
     duration: number,
     status: RunStatus
 }
 
-// === Test Run Document Schema ===
+// === Test Run File Document Schema ===
 
-export interface TestRunSchema {
-	docType: "TEST_RUN",
-	runId: ObjectId,
-	startTime: Date,
+// Test Run for a tests defined in one file
+export interface TestRunFileSchema {
+	docType: "TEST_RUN_FILE",
+	
+	// Coincides with information from LatestTestRunFile
 	name: string,
-	description: string,
 	duration: number,
+    status: RunStatus
+
+	runId: ObjectId,
+	description: string,
+	startTime: Date,
 	testsRan: number,
 	testsPassed: number,
 	tests: TestMetadata[],
-	sourceCode: string,
+	
+	sourceCode: string, // download link to source code
 	reporters: {
 		htmlUri: string, // link to html reporter
-		jsonUri: string // link to json reporter
+		jsonDownloadUri: string // download link to json reporter
 	},
-	otherAssets: TestRunAsset[]
+	otherAssets: TestRunAsset[] 
 }
 
-// Singular test
+// Data from a single test in the file
 export interface TestMetadata {
     suiteName: string,
     testName: string,

@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [ "qa-pup", "types" ],
   "author": "Kylan Duncan",
   "license": "ISC",
   "description": "TypeScript types for the qa-pup project",
