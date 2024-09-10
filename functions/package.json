@@ -1,0 +1,12 @@
+{
+  "name": "@cloudydaiyz/qa-pup-aws-lambda",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kylan Duncan",
+  "license": "ISC",
+  "description": "AWS Lambda controller function definitions for qa-pup project"
+}

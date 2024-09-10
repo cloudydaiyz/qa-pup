@@ -1,0 +1,12 @@
+{
+  "name": "qa-pup-core",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kylan Duncan",
+  "license": "ISC",
+  "description": "Core functionality for the qa-pup project"
+}
