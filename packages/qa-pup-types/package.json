@@ -1,0 +1,15 @@
+{
+  "name": "qa-pup-types",
+  "version": "1.0.0",
+  "types": "lib/types.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kylan Duncan",
+  "license": "ISC",
+  "description": "TypeScript types for the qa-pup project",
+  "devDependencies": {
+    "mongodb": "^6.8.1"
+  }
+}
