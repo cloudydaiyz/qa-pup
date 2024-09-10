@@ -14,6 +14,10 @@ function triggerManualRun() {
 
 }
 
+function addToEmailList() {
+    
+}
+
 // remove tests that are over a week old
 function testCleanup() {
 
