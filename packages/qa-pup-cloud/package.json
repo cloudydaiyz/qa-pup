@@ -1,5 +1,5 @@
 {
-  "name": "@cloudydaiyz/qa-pup-serverless",
+  "name": "@cloudydaiyz/qa-pup-cloud",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -8,5 +8,5 @@
   "keywords": [],
   "author": "Kylan Duncan",
   "license": "ISC",
-  "description": "Serverless-based functionality for qa-pup project"
+  "description": "Cloud-based functionality for qa-pup project"
 }

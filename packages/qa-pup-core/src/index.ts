@@ -1,19 +1,17 @@
-import { DashboardSchema, RunState, TestRunFileSchema, TestRunSchema } from "@cloudydaiyz/qa-pup-types";
+import { DashboardSchema, RunState, RunType, TestRunFileSchema, TestRunSchema } from "@cloudydaiyz/qa-pup-types";
 import assert from "assert";
 import { Collection, MongoClient, ObjectId, UpdateResult, WithId } from "mongodb";
 import { COLL_NAME, DB_NAME, FULL_DAY, MAX_DAILY_MANUAL_TESTS } from "./constants";
 
-class QAPupCore {
+export class PupCore {
     client: MongoClient;
     coll: Collection<TestRunSchema | DashboardSchema | TestRunFileSchema>;
+    connection: Promise<MongoClient>;
     
     constructor(uri: string) {
         this.client = new MongoClient(uri);
         this.coll = this.client.db(DB_NAME).collection(COLL_NAME);
-    }
-
-    async connect() {
-        await this.client.connect();
+        this.connection = this.client.connect();
     }
 
     public async readDashboardInfo(): Promise<DashboardSchema> {
@@ -35,7 +33,7 @@ class QAPupCore {
                     emailList: []
                 },
                 currentRun: {
-                    state: "PASS" as RunState,
+                    state: "AT REST",
                 }
             };
 
@@ -54,26 +52,36 @@ class QAPupCore {
         return testInfo;
     }
     
-    public async triggerManualRun(email?: string) {
+    public async triggerRun(runType: RunType, email?: string): Promise<void> {
+
+        let emailList = email ? [ email ] : [];
+        if(runType == "SCHEDULED") {
+            const dashboard = await this.coll.findOne({ docType: "DASHBOARD" }) as DashboardSchema;
+            assert(dashboard);
+
+            emailList = dashboard.nextScheduledRun.emailList;
+        }
+
         await this.coll.updateOne({ docType: "DASHBOARD" }, {
             $set: {
                 currentRun: {
                     state: "RUNNING",
-                    runType: "MANUAL",
+                    runType: runType,
                     runId: new ObjectId(),
                     startTime: new Date(),
-                    emailList: email ? [ email ] : []
+                    emailList: emailList
                 }
             }
         });
 
-        // start the runs in the kubernetes cluster
-        
+        // Start the test runs in the kubernetes cluster
+
     }
-    
-    public async addToEmailList(email: string, current?: boolean) {
+
+    public async addToEmailList(email: string, current?: boolean): Promise<void> {
         let update: UpdateResult;
         if(current) {
+
             // Add the email to the list of emails to be notified for the current run 
             // if the max number of emails has not been reached
             update = await this.coll.updateOne(
@@ -81,6 +89,7 @@ class QAPupCore {
                 { $addToSet: { emailList: email } }
             );
         } else {
+
             // Add the email to the list of emails to be notified for the next scheduled run 
             // if the max number of emails has not been reached
             update = await this.coll.updateOne(
@@ -88,10 +97,11 @@ class QAPupCore {
                 { $addToSet: { "nextScheduledRun.emailList": email } }
             );
         }
+        assert(update.acknowledged && update.matchedCount == 1 && update.modifiedCount == 1);
     }
     
     // Removes tests that are over a week old
-    public async testCleanup() {
+    public async testCleanup(): Promise<void> {
 
         const oldTests = await this.coll.find({ 
             docType: "TEST_RUN_FILE", 
@@ -108,7 +118,7 @@ class QAPupCore {
     }
     
     // Refresh the number of manual runs
-    public async refreshManualRuns() {
+    public async refreshManualRuns(): Promise<void> {
         await this.coll.updateOne(
             { docType: "DASHBOARD" }, 
             { $set: { 
