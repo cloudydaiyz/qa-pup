@@ -1,3 +1,0 @@
-function sendTestCompletionEmail(emailList: string[]) {
-
-}

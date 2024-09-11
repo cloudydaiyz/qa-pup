@@ -1,46 +1,22 @@
 import { DashboardSchema, RunState, RunType, TestRunFileSchema, TestRunSchema } from "@cloudydaiyz/qa-pup-types";
-import assert from "assert";
 import { Collection, MongoClient, ObjectId, UpdateResult, WithId } from "mongodb";
-import { COLL_NAME, DB_NAME, FULL_DAY, MAX_DAILY_MANUAL_TESTS } from "./constants";
+import { COLL_NAME, DB_NAME, FULL_DAY, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
+import assert from "assert";
 
 export class PupCore {
     client: MongoClient;
     coll: Collection<TestRunSchema | DashboardSchema | TestRunFileSchema>;
     connection: Promise<MongoClient>;
     
-    constructor(uri: string) {
-        this.client = new MongoClient(uri);
+    constructor(uri: string, user: string, pass: string) {
+        this.client = new MongoClient(uri, { auth: { username: user, password: pass } });
         this.coll = this.client.db(DB_NAME).collection(COLL_NAME);
         this.connection = this.client.connect();
     }
 
     public async readDashboardInfo(): Promise<DashboardSchema> {
         let dashboard = await this.coll.findOne({ docType: "DASHBOARD" }) as DashboardSchema;
-        if(!dashboard) {
-            dashboard = {
-                docType: "DASHBOARD",
-                runId: new ObjectId(),
-                runType: "SCHEDULED",
-                startTime: new Date(),
-                latestTests: [],
-                manualRun: {
-                    remaining: MAX_DAILY_MANUAL_TESTS,
-                    max: MAX_DAILY_MANUAL_TESTS,
-                    nextRefresh: new Date()
-                },
-                nextScheduledRun: {
-                    startTime: new Date(),
-                    emailList: []
-                },
-                currentRun: {
-                    state: "AT REST",
-                }
-            };
-
-            // Insert the new dashboard and ensure it was successful
-            const insertResult = await this.coll.insertOne(dashboard);
-            assert(insertResult.acknowledged);
-        }
+        assert(dashboard, "MongoDB improperly initialized");
         return dashboard;
     }
     
@@ -52,14 +28,19 @@ export class PupCore {
         return testInfo;
     }
     
-    public async triggerRun(runType: RunType, email?: string): Promise<void> {
+    public async triggerRun(runType: RunType, email?: string): Promise<boolean> {
 
         let emailList = email ? [ email ] : [];
+        let userInEmailList = true;
         if(runType == "SCHEDULED") {
             const dashboard = await this.coll.findOne({ docType: "DASHBOARD" }) as DashboardSchema;
             assert(dashboard);
+            const scheduleList = dashboard.nextScheduledRun.emailList;
 
-            emailList = dashboard.nextScheduledRun.emailList;
+            emailList = scheduleList.length < 10 
+                ? emailList.concat(dashboard.nextScheduledRun.emailList) 
+                : scheduleList;
+            userInEmailList = scheduleList.length < 10;
         }
 
         await this.coll.updateOne({ docType: "DASHBOARD" }, {
@@ -76,6 +57,8 @@ export class PupCore {
 
         // Start the test runs in the kubernetes cluster
 
+
+        return userInEmailList;
     }
 
     public async addToEmailList(email: string, current?: boolean): Promise<void> {
@@ -83,7 +66,7 @@ export class PupCore {
         if(current) {
 
             // Add the email to the list of emails to be notified for the current run 
-            // if the max number of emails has not been reached
+            // if the max number of emails has not been reached and it's currently running
             update = await this.coll.updateOne(
                 { docType: "DASHBOARD", "currentRun.status": "RUNNING", "currentRun.emailList": { $size: { $lt: 10 } } }, 
                 { $addToSet: { emailList: email } }
@@ -105,11 +88,11 @@ export class PupCore {
 
         const oldTests = await this.coll.find({ 
             docType: "TEST_RUN_FILE", 
-            startTime: { $lt: new Date(Date.now() - 7 * FULL_DAY) } 
+            startTime: { $lt: new Date(Date.now() - TEST_LIFETIME) } 
         }).toArray() as WithId<TestRunFileSchema>[];
 
-        // Delete tests from S3 bucket
-
+        // Delete old test artifacts from S3 bucket
+        
 
         // Delete tests from database
         const deleteResult = await this.coll.deleteMany(
