@@ -1,11 +1,21 @@
 {
-  "name": "qa-pup-test-container",
+  "name": "test-container",
   "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretest": "tsc && node scripts/prepare-test.js",
+    "test": "playwright test",
+    "posttest": "node scripts/cleanup-test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Docker container for running tests"
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^22.5.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.649.0"
+  }
 }

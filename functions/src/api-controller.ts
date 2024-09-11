@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { PupCore } from "@cloudydaiyz/qa-pup-core";
 import { Path } from "path-parser";
-import assert from "assert";
 import { ObjectId } from "mongodb";
+import assert from "assert";
 
 assert(process.env.MONGO_URI && process.env.MONGO_USER && process.env.MONGO_PASS, 
     "MongoDB environment variables not set");
@@ -45,7 +45,7 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             return { statusCode: 404, body };
         }
     } catch(e) {
-        
+
         body = JSON.stringify({ message: (e as Error).message })
         return { statusCode: 400, body };
     }
