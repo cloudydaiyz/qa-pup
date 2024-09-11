@@ -1,0 +1,1 @@
+- For api gateway, specify the payload format version to be 1.0

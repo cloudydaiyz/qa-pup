@@ -14,5 +14,9 @@
   "description": "TypeScript types for the qa-pup project",
   "devDependencies": {
     "mongodb": "^6.8.1"
-  }
+  },
+  "files": [
+    "lib",
+    "package.json"
+  ]
 }

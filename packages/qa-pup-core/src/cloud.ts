@@ -46,7 +46,3 @@ export async function initiateKubernetesTestRun() { }
 
 // TODO
 function sendTestCompletionEmail(emailList: string[]) { }
-
-// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/PutObjectCommand/
-// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/GetObjectCommand/
-// https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html#API_GetObject_RequestSyntax

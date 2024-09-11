@@ -8,7 +8,8 @@ export const TEST_LIFETIME = 7 * FULL_DAY;
 export const TEST_ARTIFACTS_BUCKET = "qa-pup-test-artifacts";
 export const TEST_CODE_BUCKET = "qa-pup-test-code";
 
-// dashboard = {
+// === Initial dashboard document === 
+// {
 //     docType: "DASHBOARD",
 //     runId: new ObjectId(),
 //     runType: "SCHEDULED",

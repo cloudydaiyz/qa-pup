@@ -35,7 +35,7 @@ export class PupCore {
         let userInEmailList = true;
         if(runType == "SCHEDULED") {
             const dashboard = await this.coll.findOne({ docType: "DASHBOARD" }) as DashboardSchema;
-            assert(dashboard);
+            assert(dashboard, "No dashboard information available");
             const scheduleList = dashboard.nextScheduledRun.emailList;
 
             emailList = scheduleList.length < 10 
