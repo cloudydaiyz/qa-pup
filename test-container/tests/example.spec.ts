@@ -16,3 +16,19 @@ test('get started link', async ({ page }) => {
   // Expects page to have a heading with the name of Installation.
   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
 });
+
+test.describe('Additional tests', () => {
+  test('has search input', async ({ page }) => {
+    await page.goto('https://playwright.dev/');
+
+    // Expect the search input to be visible.
+    // await expect(page.locator('input')).toBeVisible();
+  });
+
+  test('has non-existing element', async ({ page }) => {
+    await page.goto('https://playwright.dev/');
+
+    // Expect a non-existing element to be visible (intentional failure).
+    await expect(page.locator('.non-existing-element')).toBeVisible();
+  });
+});
