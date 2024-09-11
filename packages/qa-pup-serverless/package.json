@@ -1,5 +1,5 @@
 {
-  "name": "qa-pup-serverless",
+  "name": "@cloudydaiyz/qa-pup-serverless",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {

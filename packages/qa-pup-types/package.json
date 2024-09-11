@@ -1,11 +1,14 @@
 {
-  "name": "qa-pup-types",
-  "version": "1.0.0",
+  "name": "@cloudydaiyz/qa-pup-types",
+  "version": "1.1.3",
   "types": "lib/types.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [ "qa-pup", "types" ],
+  "keywords": [
+    "qa-pup",
+    "types"
+  ],
   "author": "Kylan Duncan",
   "license": "ISC",
   "description": "TypeScript types for the qa-pup project",

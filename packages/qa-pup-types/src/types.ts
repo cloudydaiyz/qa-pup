@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 
-type RunType = "MANUAL" | "SCHEDULED";
-type RunStatus = "PASS" | "FAIL" | "ERROR";
-type RunState = "RUNNING" | "AT REST";
+export type RunType = "MANUAL" | "SCHEDULED";
+export type RunStatus = "PASS" | "FAIL" | "ERROR";
+export type RunState = "RUNNING" | "AT REST";
 
 // === Test Run Schema ===
 
@@ -42,11 +42,11 @@ export interface DashboardSchema {
 
     // Information about the current run
 	currentRun: {
-		status: RunState,
-		runType: RunType,
-		runId: ObjectId,
-		startTime: Date, 
-		emailList: string[]
+		state: RunState,
+		runType?: RunType,
+		runId?: ObjectId,
+		startTime?: Date, 
+		emailList?: string[]
 	}
 }
 
