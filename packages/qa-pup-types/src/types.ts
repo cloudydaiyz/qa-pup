@@ -79,7 +79,8 @@ export interface TestRunFileSchema {
 	sourceCode: string, // download link to source code
 	reporters: {
 		htmlUri: string, // link to html reporter
-		jsonDownloadUri: string // download link to json reporter
+		htmlObjectKey: string, // s3 object key to html reporter
+		jsonObjectKey: string // s3 object key to json reporter
 	},
 	otherAssets: TestRunAsset[] 
 }
@@ -95,6 +96,6 @@ export interface TestMetadata {
 
 // Asset generated from test run
 export interface TestRunAsset {
-    name: string,
-    downloadUri: string
+    name: string, // name of asset
+    objectKey: string // s3 object key for asset
 }

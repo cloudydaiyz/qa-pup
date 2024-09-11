@@ -1,6 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestRunFileSchema, TestRunSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateResult, WithId } from "mongodb";
 import { COLL_NAME, DB_NAME, FULL_DAY, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
+import { deleteTestArtifacts } from "./cloud";
 import assert from "assert";
 
 export class PupCore {
@@ -24,7 +25,7 @@ export class PupCore {
         const testInfo = await this.coll.findOne(
             { docType: "TEST_RUN_FILE", runId, name }
         ) as TestRunFileSchema;
-        assert(testInfo);
+        assert(testInfo, "No test info currently available for the specified test run");
         return testInfo;
     }
     
@@ -56,7 +57,7 @@ export class PupCore {
         });
 
         // Start the test runs in the kubernetes cluster
-
+        initiateKubernetesTestRun();
 
         return userInEmailList;
     }
@@ -91,13 +92,18 @@ export class PupCore {
             startTime: { $lt: new Date(Date.now() - TEST_LIFETIME) } 
         }).toArray() as WithId<TestRunFileSchema>[];
 
+        const operations = [];
+
         // Delete old test artifacts from S3 bucket
-        
+        operations.push(deleteTestArtifacts(oldTests));
 
         // Delete tests from database
-        const deleteResult = await this.coll.deleteMany(
+        operations.push(this.coll.deleteMany(
             { _id: { $in: oldTests.map(test => test._id) } }
-        );
+        ));
+
+        // Wait for all the cleanup operations to finish
+        await Promise.all(operations);
     }
     
     // Refresh the number of manual runs
@@ -110,4 +116,8 @@ export class PupCore {
             } }
         );
     }
+}
+
+function initiateKubernetesTestRun() {
+    throw new Error("Function not implemented.");
 }
