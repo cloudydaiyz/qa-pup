@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This CloudFormation template will produce the web host to build your AMI
+Parameters:
+  AmiID:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: The AMI ID - Leave as Default
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  InstanceType:
+    Description: Web Host EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m4.large
+      - m5.large
+  MyVPC:
+    Description: Select Your VPC (Most Likely the Default VPC)
+    Type: 'AWS::EC2::VPC::Id'
+  MyIP:
+    Description: Please enter your local IP address followed by a /32 to restrict HTTP(80) access. To find your IP use an internet search phrase "What is my IP".
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(32))$'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/32
+  PublicSubnet:
+    Description: Select a Public Subnet from your VPC that has access to the internet
+    Type: 'AWS::EC2::Subnet::Id'
+
+Mappings: 
+  EC2ImageRegionMap:
+    us-west-1: 
+      "ASU": "https://ws-assets-prod-iad-r-sfo-f61fc67057535f1b.s3.us-west-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    us-west-2: 
+      "ASU": "https://ws-assets-prod-iad-r-pdx-f3b3f9f1a7d6a3d0.s3.us-west-2.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    us-east-1: 
+      "ASU": "https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    us-east-2: 
+      "ASU": "https://ws-assets-prod-iad-r-cmh-8d6e9c21a4dec77d.s3.us-east-2.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ap-southeast-1: 
+      "ASU": "https://ws-assets-prod-iad-r-sin-694a125e41645312.s3.ap-southeast-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ap-southeast-2: 
+      "ASU": "https://ws-assets-prod-iad-r-syd-b04c62a5f16f7b2e.s3.ap-southeast-2.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ap-northeast-1: 
+      "ASU": "https://ws-assets-prod-iad-r-nrt-2cb4b4649d0e0f94.s3.ap-northeast-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ap-northeast-2: 
+      "ASU": "https://ws-assets-prod-iad-r-icn-ced060f0d38bc0b0.s3.ap-northeast-2.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ap-northeast-3: 
+      "ASU": "https://ws-assets-prod-iad-r-kix-c2a28ad4e55ea53a.s3.ap-northeast-3.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ap-south-1: 
+      "ASU": "https://ws-assets-prod-iad-r-bom-431207042d319a2d.s3.ap-south-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    ca-central-1: 
+      "ASU": "https://ws-assets-prod-iad-r-yul-5c2977cd61bca1f3.s3.ca-central-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    eu-west-1: 
+      "ASU": "https://ws-assets-prod-iad-r-dub-85e3be25bd827406.s3.eu-west-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    eu-west-2: 
+      "ASU": "https://ws-assets-prod-iad-r-lhr-cc4472a651221311.s3.eu-west-2.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    eu-west-3: 
+      "ASU": "https://ws-assets-prod-iad-r-cdg-9e76383c31ad6229.s3.eu-west-3.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    eu-north-1: 
+      "ASU": "https://ws-assets-prod-iad-r-arn-580aeca3990cef5a.s3.eu-north-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    eu-central-1: 
+      "ASU": "https://ws-assets-prod-iad-r-fra-b129423e91500967.s3.eu-central-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+    sa-east-1: 
+      "ASU": "https://ws-assets-prod-iad-r-gru-527b8c19222c1182.s3.sa-east-1.amazonaws.com/f3a3e2bd-e1d5-49de-b8e6-dac361842e76/ec2-web-host.tar"
+
+Resources:
+  WebhostSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref MyVPC
+      GroupName: !Sub ${AWS::StackName} - Website Security Group
+      GroupDescription: Allow Access to the Webhost on Port 80
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: !Ref MyIP
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName} - Web Host Security Group
+  WebServerInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref AmiID
+      InstanceType: !Ref InstanceType
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref WebhostSecurityGroup
+          AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !Ref PublicSubnet
+      UserData: 
+        Fn::Base64: !Sub 
+          - |
+            #!/bin/bash -xe
+            yum -y update
+            yum -y install httpd
+            amazon-linux-extras install php7.2
+            yum -y install php-mbstring
+            yum -y install telnet
+            case $(ps -p 1 -o comm | tail -1) in
+            systemd) systemctl enable --now httpd ;;
+            init) chkconfig httpd on; service httpd start ;;
+            *) echo "Error starting httpd (OS not using init or systemd)." 2>&1
+            esac
+            cd /var/www/html
+            wget ${EC2Image}
+            tar xvf ec2-web-host.tar
+          - {
+            EC2Image: !FindInMap [EC2ImageRegionMap, !Ref "AWS::Region", ASU]
+            }
+
+Outputs:
+  PublicIP:
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - WebServerInstance
+          - PublicIp
+    Description: Newly created webhost Public IP
+  PublicDNS:
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - WebServerInstance
+          - PublicDnsName
+    Description: Newly created webhost Public DNS URL
