@@ -1,7 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestRunFileSchema, TestRunSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateResult, WithId } from "mongodb";
 import { COLL_NAME, DB_NAME, FULL_DAY, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
-import { deleteTestArtifacts } from "./cloud";
+import { deleteTestArtifacts, initiateKubernetesTestRun } from "./cloud";
 import assert from "assert";
 
 export class PupCore {
@@ -57,7 +57,7 @@ export class PupCore {
         });
 
         // Start the test runs in the kubernetes cluster
-        initiateKubernetesTestRun();
+        await initiateKubernetesTestRun();
 
         return userInEmailList;
     }
@@ -91,13 +91,10 @@ export class PupCore {
             docType: "TEST_RUN_FILE", 
             startTime: { $lt: new Date(Date.now() - TEST_LIFETIME) } 
         }).toArray() as WithId<TestRunFileSchema>[];
-
         const operations = [];
 
-        // Delete old test artifacts from S3 bucket
+        // Delete test from database & old test artifacts from S3 bucket
         operations.push(deleteTestArtifacts(oldTests));
-
-        // Delete tests from database
         operations.push(this.coll.deleteMany(
             { _id: { $in: oldTests.map(test => test._id) } }
         ));
@@ -116,8 +113,4 @@ export class PupCore {
             } }
         );
     }
-}
-
-function initiateKubernetesTestRun() {
-    throw new Error("Function not implemented.");
 }

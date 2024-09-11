@@ -2,6 +2,7 @@ import { S3Client, DeleteObjectsCommand, PutObjectCommand, ObjectIdentifier } fr
 import { TEST_ARTIFACTS_BUCKET } from "./constants";
 import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 
+// Deletes all test artifacts in the test run files from the S3 bucket
 export async function deleteTestArtifacts(testRuns: TestRunFileSchema[]) {
     const reporterObjectKeys = testRuns
         .reduce(
@@ -30,19 +31,22 @@ export async function deleteTestArtifacts(testRuns: TestRunFileSchema[]) {
     await s3Client.send(command);
 }
 
+
+// TODO: Implement this method in the container instead
 export async function uploadTestArtifacts(suiteName: string, testName: string) {
-    const s3Client = new S3Client();
-    const command = new PutObjectCommand({
-        Bucket: TEST_ARTIFACTS_BUCKET,
-        Key: "",
-    });
+    // const s3Client = new S3Client();
+    // const command = new PutObjectCommand({
+    //     Bucket: TEST_ARTIFACTS_BUCKET,
+    //     Key: "",
+    // });
 }
 
 // TODO
-function initiateKubernetesTestRun() { }
+export async function initiateKubernetesTestRun() { }
 
 // TODO
 function sendTestCompletionEmail(emailList: string[]) { }
 
-// 
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/PutObjectCommand/
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/GetObjectCommand/
 // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html#API_GetObject_RequestSyntax
