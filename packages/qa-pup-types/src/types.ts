@@ -1,7 +1,8 @@
 import { ObjectId } from "mongodb";
 
 export type RunType = "MANUAL" | "SCHEDULED";
-export type RunStatus = "PASS" | "FAIL" | "ERROR";
+export type RunStatus = "PASSED" | "FAILED" | "ERROR";
+export type RunStatusLower = "passed" | "failed" | "error";
 export type RunState = "RUNNING" | "AT REST";
 
 // === Dashboard Document Schema ===
@@ -39,8 +40,7 @@ export interface DashboardSchema {
 	}
 }
 
-// Information about a test file in the latest test run displayed on the
-// dashboard
+// Information about a test file in the latest test run displayed on the dashboard
 export interface LatestTestRunFile {
     name: string,
     duration: number,
@@ -60,7 +60,7 @@ export interface TestRunFileSchema {
 
 	// Test information
 	runId: ObjectId,
-	description: string, // description for test file
+	// description: string, // description for test file
 	startTime: Date, // computed, earliest start time of all tests
 	testsRan: number, // computed
 	testsPassed: number, // computed
