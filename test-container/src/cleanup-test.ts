@@ -1,26 +1,28 @@
 // export assets to test-artifacts bucket
 
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { LatestTestRunFile, RunStatus, TestAsset, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import assert from "assert";
 import fs from "fs";
+import mime from "mime-types";
 
 // const artifactsBucket = process.env.TEST_ARTIFACTS_BUCKET;
-const file = "qa-pup-example.spec.ts";
-
-const TEST_CODE_FILE = "qa-pup-example-spec-ts";
+const TEST_CODE_FILE = "example.spec.ts";
+const TEST_CODE = TEST_CODE_FILE.replaceAll(/(\s|\.)+/g, "-");
 const TEST_DESCRIPTION = "Example test file for QA-PUP";
-const BUCKET = "qa-pup-example-input";
+const TEST_CODE_BUCKET = "qa-pup-example-input";
+const TEST_OUTPUT_BUCKET = "qa-pup-example-output";
 const REGION = "us-east-2";
 const RUN_ID = "runidexample12345"; // stringified run id
 
 // === test-results.json Schema ===
 
 export interface TestResultsJson {
-	suites: {
-		title: string;
+	suites: { // usually only one member
+		title: string; // file name
 		specs: TestSpecs[]; // top level tests
 		suites: { // multiple test suites
-			title: string,
+			title: string, // suite name
 			specs: TestSpecs[] // tests for a specific test suite
 		}[];
 	}[];
@@ -49,28 +51,11 @@ export interface TestSpecs { // usually one for each project and test
 	}[];
 }
 
-async function readResults() {
-    const data = fs.readFileSync('./playwright-report/test-results.json');
-    const obj = JSON.parse(data.toString()) as TestResultsJson;
-    console.log(obj.suites[0].title);
-    console.log(obj.suites[0].specs[0].title);
-    console.log(obj.suites[0].specs[0].tests[0].projectName);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].status);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].duration);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].startTime);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[0].name);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[0].contentType);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[0].path);
-    console.log(obj.stats.startTime);
-    console.log(obj.stats.duration);
-
-    // const d2 = fs.readdirSync('./playwright-report/data');
-    // console.log(d2);
-}
+// === File Schema ===
 
 // Useful for the frontend
 async function readDataFromBucket() {
-    fetch(`https://${BUCKET}.s3.${REGION}.amazonaws.com/qa-pup-example.spec.ts`)
+    fetch(`https://${TEST_OUTPUT_BUCKET}.s3.${REGION}.amazonaws.com/qa-pup-example.spec.ts`)
         .then(res => res.text())
         .then(txt => console.log(txt));
     
@@ -78,25 +63,27 @@ async function readDataFromBucket() {
 }
 
 // Put reporters and test assets into S3 bucket, and update the MongoDB database
+// NOTE: Come back to this and update with better async/await usage
 async function cleanup() {
-    console.log('Begin cleanup...');
+    console.log('Begin cleanup');
 
     // Put index.html and test-results.json into the bucket
+    console.log('Storing test artifacts...');
     const index = fs.readFileSync('./playwright-report/index.html');
     const testResults = fs.readFileSync('./playwright-report/test-results.json');
     const client = new S3Client({ region: REGION });
 
     const putIndex = new PutObjectCommand({
-        Bucket: BUCKET,
-        Key: `${RUN_ID}/${TEST_CODE_FILE}/index.html`,
+        Bucket: TEST_OUTPUT_BUCKET,
+        Key: `${RUN_ID}/${TEST_CODE}/index.html`,
         Body: index
     });
     const response1 = await client.send(putIndex);
     assert(response1.ETag, "Invalid response");
 
     const putTestResults = new PutObjectCommand({
-        Bucket: BUCKET,
-        Key: `${RUN_ID}/${TEST_CODE_FILE}/test-results.json`,
+        Bucket: TEST_OUTPUT_BUCKET,
+        Key: `${RUN_ID}/${TEST_CODE}/test-results.json`,
         Body: testResults,
     });
     const response2 = await client.send(putTestResults);
@@ -107,8 +94,8 @@ async function cleanup() {
     for(const file of dataFiles) {
         const data = fs.readFileSync(`./playwright-report/data/${file}`);
         const putData = new PutObjectCommand({
-            Bucket: BUCKET,
-            Key: `${RUN_ID}/${TEST_CODE_FILE}/data/${file}`,
+            Bucket: TEST_OUTPUT_BUCKET,
+            Key: `${RUN_ID}/${TEST_CODE}/data/${file}`,
             Body: data,
         });
         const response = await client.send(putData);
@@ -116,61 +103,99 @@ async function cleanup() {
     }
 
     // Init overall test statistics from file
-    let startTime = new Date(); // earliest start time
-    let endTime = new Date(0); // latest end time + duration
+    const testData = JSON.parse(testResults.toString()) as TestResultsJson;
+    const startTime = new Date(testData.stats.startTime); // earliest start time
+    const duration = testData.stats.duration; // latest end time + duration
     let testsRan = 0;
     let testsPassed = 0;
     
     // Puts the test assets from test-results.json into the bucket for a single test
+    const testMetadata: TestMetadataSchema[] = [];
     const updateTestData = async (spec: TestSpecs, testSuiteName?: string) => {
         const testBrowser = spec.tests[0].projectName;
-        const testName = spec.title.replace(/\s+/, "-") + "-" + testBrowser;
+        const testName = spec.title.replaceAll(/(\s|\.)+/g, "-") + "-" + testBrowser;
 
         // Put the video asset into the bucket
-        const vidLocalPath = spec.tests[0].results[0].attachments[0].path;
-        const vidData = fs.readFileSync(vidLocalPath);
-        const putVid = new PutObjectCommand({
-            Bucket: BUCKET,
-            Key: `${RUN_ID}/${TEST_CODE_FILE}/${testName}`,
-            Body: vidData,
+        const assets: TestAsset[] = [];
+        const assetOperations: Promise<void>[] = [];
+        spec.tests[0].results[0].attachments.forEach(async (attachment, index) => {
+            const vidLocalPath = attachment.path;
+            const vidMimeExt = mime.extension(attachment.contentType);
+            const vidFileName = `${testName}-${attachment.name}-${index}.${vidMimeExt}`;
+
+            const vidData = fs.readFileSync(vidLocalPath);
+            const putVid = new PutObjectCommand({
+                Bucket: TEST_OUTPUT_BUCKET,
+                Key: `${RUN_ID}/${TEST_CODE}/${vidFileName}`,
+                ContentType: attachment.contentType,
+                Body: vidData,
+            });
+            console.log(attachment.contentType);
+
+            const testVidObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/${vidFileName}`;
+            const putVidOp = client.send(putVid)
+                .then(response => {
+                    assert(response.ETag, "Invalid response");
+                    assets.push({ name: `${testName}-${attachment.name}-${index}`, objectUrl: testVidObjUrl });
+                });
+            assetOperations.push(putVidOp);
+            console.log(testVidObjUrl);
         });
-        const response = await client.send(putVid);
-        assert(response.ETag, "Invalid response");
+        await Promise.all(assetOperations);
 
         // Obtain storage data for MongoDB
-        const testStartTime = new Date(spec.tests[0].results[0].startTime);
-        const testDuration = spec.tests[0].results[0].duration;
-        const testStatus = spec.tests[0].results[0].status.toUpperCase();
-        const testVidName = "video";
-        const testVidObjUrl = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE_FILE}/${testName}`;
+        const testStatus = spec.tests[0].results[0].status.toUpperCase() as RunStatus;
+        testMetadata.push({
+            testName: testName,
+            suiteName: testSuiteName,
+            startTime: new Date(spec.tests[0].results[0].startTime),
+            duration: spec.tests[0].results[0].duration,
+            status: testStatus,
+            assets: assets
+        });
 
         // Update overall test statistics
-        const testEndTime = new Date(testStartTime.getTime() + testDuration);
-        if(testStartTime < startTime) startTime = testStartTime;
-        if(testEndTime > endTime) endTime = testEndTime;
         if(testStatus == "PASSED") testsPassed++;
         testsRan++;
     }
 
     // Update the test data of tests in suites and outside of suites
-    const testData = JSON.parse(testResults.toString()) as TestResultsJson;
-    for(const spec of testData.suites[0].specs) updateTestData(spec);
+    console.log("Updating test data...");
+    for(const spec of testData.suites[0].specs) await updateTestData(spec);
     for(const suite of testData.suites[0].suites) {
         for(const spec of suite.specs) {
-            updateTestData(spec, suite.title.replace(/\s+/, "-"));
+            await updateTestData(spec, suite.title.replaceAll(/(\s|\.)+/g, "-"));
         }
     }
 
     // Compute overall test statistics from file
-    const duration = endTime.getTime() - startTime.getTime();
     const status = testsRan == testsPassed ? "PASSED" : "FAILED";
 
     // TODO: Store corresponding test data in MongoDB
-    const indexUrl = `https://${BUCKET}.s3-website.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE_FILE}/index.html`;
-    const testResultsObjUrl = `https://${BUCKET}.s3-website.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE_FILE}/test-results.json`;
+    console.log("Sending test results to database...");
+
+    // Create new documents for the test run
+    const indexUrl = `http://${TEST_OUTPUT_BUCKET}.s3-website.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/index.html`;
+    const testResultsObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/test-results.json`;
+    const testRunFile: TestRunFileSchema = {
+        docType: "TEST_RUN_FILE",
+        name: TEST_CODE,
+        duration: duration,
+        status: status,
+        runId: RUN_ID,
+        startTime: startTime,
+        testsRan: testsRan,
+        testsPassed: testsPassed,
+        tests: testMetadata,
+        sourceObjectUrl: `https://${TEST_CODE_BUCKET}.s3.${REGION}.amazonaws.com/${TEST_CODE_FILE}`,
+        reporters: {
+            htmlStaticUrl: indexUrl,
+            jsonObjectUrl: testResultsObjUrl
+        }
+    };
+    console.log(testRunFile);
 
     console.log('Cleanup complete!');
 }
 
-// cleanup();
-readResults();
+cleanup();

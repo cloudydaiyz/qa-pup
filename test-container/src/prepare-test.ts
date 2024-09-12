@@ -8,9 +8,9 @@ import fs from "fs";
 // const codeFile = process.env.TEST_CODE_FILE;
 
 // NOTE: file name must be formatted, e.g. `example-spec-ts` for `example.spec.ts`
-const TEST_CODE_FILE = "qa-pup-example-spec-ts";
-const REGION = "us-east-2";
 const BUCKET = "qa-pup-example-input";
+const REGION = "us-east-2";
+const TEST_CODE_FILE = "example.spec.ts";
 
 async function prepare() {
     console.log('Preparing test...');

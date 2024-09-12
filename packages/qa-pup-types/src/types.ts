@@ -82,7 +82,7 @@ export interface TestRunFileSchema {
 
 // Data from a single test in the file
 export interface TestMetadataSchema {
-	testRunFileId: ObjectId,
+	testRunFileId?: ObjectId,
     suiteName?: string,
     testName: string,
     startTime: Date,
