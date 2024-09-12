@@ -12,23 +12,6 @@ const TEST_CODE_FILE = "qa-pup-example-spec-ts";
 const REGION = "us-east-2";
 const BUCKET = "qa-pup-example-input";
 
-// https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
-async function prepareSample() {
-    // assert(codeBucket, 'TEST_CODE_BUCKET is required');
-    const client = new S3Client({ region: "us-east-1" });
-    console.log('preparing');
-    const command = new GetObjectCommand({
-        Bucket: "cf-templates-jy2ivedl9rti-us-east-1",
-        Key: "2024-06-10T203259.224Z9fz-EC2-Auto-Scaling-Lab.yaml"
-    });
-    const response = await client.send(command);
-    assert(response.Body, "No response body");
-
-    // console.log(await response.Body.transformToString());
-    fs.mkdirSync('./write-example', { recursive: true });
-    fs.writeFileSync('./write-example/Auto-Scaling-Lab.yaml', await response.Body.transformToByteArray(), {flag: 'w'});
-}
-
 async function prepare() {
     console.log('Preparing test...');
     assert(TEST_CODE_FILE, "No file name specified, unable to prepare test");
@@ -49,5 +32,4 @@ async function prepare() {
     console.log('Test setup successful!');
 }
 
-// prepareSample();
-// prepare();
+prepare();
