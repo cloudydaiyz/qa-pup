@@ -1,19 +1,11 @@
-// export assets to test-artifacts bucket
-
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { LatestTestRunFile, RunStatus, TestAsset, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import assert from "assert";
 import fs from "fs";
 import mime from "mime-types";
 
-// const artifactsBucket = process.env.TEST_ARTIFACTS_BUCKET;
-const TEST_CODE_FILE = "example.spec.ts";
-const TEST_CODE = TEST_CODE_FILE.replaceAll(/(\s|\.)+/g, "-");
-const TEST_DESCRIPTION = "Example test file for QA-PUP";
-const TEST_CODE_BUCKET = "qa-pup-example-input";
-const TEST_OUTPUT_BUCKET = "qa-pup-example-output";
-const REGION = "us-east-2";
-const RUN_ID = "runidexample12345"; // stringified run id
+import { AWS_REGION, TEST_CODE_BUCKET, TEST_OUTPUT_BUCKET, TEST_CODE_FILE, RUN_ID, TEST_CODE } from "./constants";
+
 
 // === test-results.json Schema ===
 
@@ -51,11 +43,9 @@ export interface TestSpecs { // usually one for each project and test
 	}[];
 }
 
-// === File Schema ===
-
 // Useful for the frontend
 async function readDataFromBucket() {
-    fetch(`https://${TEST_OUTPUT_BUCKET}.s3.${REGION}.amazonaws.com/qa-pup-example.spec.ts`)
+    fetch(`https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/qa-pup-example.spec.ts`)
         .then(res => res.text())
         .then(txt => console.log(txt));
     
@@ -71,7 +61,7 @@ async function cleanup() {
     console.log('Storing test artifacts...');
     const index = fs.readFileSync('./playwright-report/index.html');
     const testResults = fs.readFileSync('./playwright-report/test-results.json');
-    const client = new S3Client({ region: REGION });
+    const client = new S3Client({ region: AWS_REGION });
 
     const putIndex = new PutObjectCommand({
         Bucket: TEST_OUTPUT_BUCKET,
@@ -132,7 +122,7 @@ async function cleanup() {
             });
             console.log(attachment.contentType);
 
-            const testVidObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/${vidFileName}`;
+            const testVidObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/${vidFileName}`;
             const putVidOp = client.send(putVid)
                 .then(response => {
                     assert(response.ETag, "Invalid response");
@@ -175,8 +165,8 @@ async function cleanup() {
     console.log("Sending test results to database...");
 
     // Create new documents for the test run
-    const indexUrl = `http://${TEST_OUTPUT_BUCKET}.s3-website.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/index.html`;
-    const testResultsObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/test-results.json`;
+    const indexUrl = `http://${TEST_OUTPUT_BUCKET}.s3-website.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/index.html`;
+    const testResultsObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/test-results.json`;
     const testRunFile: TestRunFileSchema = {
         docType: "TEST_RUN_FILE",
         name: TEST_CODE,
@@ -187,7 +177,7 @@ async function cleanup() {
         testsRan: testsRan,
         testsPassed: testsPassed,
         tests: testMetadata,
-        sourceObjectUrl: `https://${TEST_CODE_BUCKET}.s3.${REGION}.amazonaws.com/${TEST_CODE_FILE}`,
+        sourceObjectUrl: `https://${TEST_CODE_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${TEST_CODE_FILE}`,
         reporters: {
             htmlStaticUrl: indexUrl,
             jsonObjectUrl: testResultsObjUrl

@@ -1,30 +1,23 @@
-// import tests from S3 bucket into the ./tests folder
-
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import assert from "assert";
 import fs from "fs";
 
-// const codeBucket = process.env.TEST_CODE_BUCKET;
-// const codeFile = process.env.TEST_CODE_FILE;
+import { AWS_REGION, TEST_CODE_BUCKET, TEST_CODE_FILE } from "./constants";
 
-// NOTE: file name must be formatted, e.g. `example-spec-ts` for `example.spec.ts`
-const BUCKET = "qa-pup-example-input";
-const REGION = "us-east-2";
-const TEST_CODE_FILE = "example.spec.ts";
 
 async function prepare() {
     console.log('Preparing test...');
-    assert(TEST_CODE_FILE, "No file name specified, unable to prepare test");
 
-    // TODO: Obtain test code file from S3 bucket
-    const client = new S3Client({ region: REGION });
+    // Obtain test code file from S3 bucket
+    const client = new S3Client({ region: AWS_REGION });
     const command = new GetObjectCommand({
-        Bucket: BUCKET,
+        Bucket: TEST_CODE_BUCKET,
         Key: TEST_CODE_FILE
     });
     const response = await client.send(command);
     assert(response.Body, "No response body");
 
+    // Import tests from S3 bucket into the ./tests folder
     const fileStr = await response.Body.transformToByteArray();
     fs.mkdirSync('./tests', { recursive: true });
     fs.writeFileSync('./tests/' + TEST_CODE_FILE, fileStr);
