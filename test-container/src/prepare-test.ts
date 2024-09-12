@@ -5,7 +5,12 @@ import assert from "assert";
 import fs from "fs";
 
 // const codeBucket = process.env.TEST_CODE_BUCKET;
-const file = "qa-pup-example.spec.ts";
+// const codeFile = process.env.TEST_CODE_FILE;
+
+// NOTE: file name must be formatted, e.g. `example-spec-ts` for `example.spec.ts`
+const TEST_CODE_FILE = "qa-pup-example-spec-ts";
+const REGION = "us-east-2";
+const BUCKET = "qa-pup-example-input";
 
 // https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html
 async function prepareSample() {
@@ -18,24 +23,30 @@ async function prepareSample() {
     });
     const response = await client.send(command);
     assert(response.Body, "No response body");
+
     // console.log(await response.Body.transformToString());
     fs.mkdirSync('./write-example', { recursive: true });
     fs.writeFileSync('./write-example/Auto-Scaling-Lab.yaml', await response.Body.transformToByteArray(), {flag: 'w'});
 }
 
 async function prepare() {
-    console.log('preparing');
-    const client = new S3Client();
+    console.log('Preparing test...');
+    assert(TEST_CODE_FILE, "No file name specified, unable to prepare test");
+
+    // TODO: Obtain test code file from S3 bucket
+    const client = new S3Client({ region: REGION });
     const command = new GetObjectCommand({
-        Bucket: "qa-pup-example-input",
-        Key: file
+        Bucket: BUCKET,
+        Key: TEST_CODE_FILE
     });
     const response = await client.send(command);
     assert(response.Body, "No response body");
-    const fileStr = await response.Body.transformToString();
-    console.log(fileStr);
+
+    const fileStr = await response.Body.transformToByteArray();
     fs.mkdirSync('./tests', { recursive: true });
-    fs.writeFileSync('./tests/' + file, fileStr);
+    fs.writeFileSync('./tests/' + TEST_CODE_FILE, fileStr);
+
+    console.log('Test setup successful!');
 }
 
 // prepareSample();

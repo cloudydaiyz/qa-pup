@@ -54,16 +54,19 @@ export interface TestRunFileSchema {
 	docType: "TEST_RUN_FILE",
 	
 	// Coincides with information from LatestTestRunFile
-	name: string,
-	duration: number,
-    status: RunStatus
+	name: string, // key name of the test file
+	duration: number, // computed, based on latest end time of all tests
+    status: RunStatus // computed, based on status of all tests 
 
+	// Test information
 	runId: ObjectId,
-	description: string,
-	startTime: Date,
-	testsRan: number,
-	testsPassed: number,
+	description: string, // description for test file
+	startTime: Date, // computed, earliest start time of all tests
+	testsRan: number, // computed
+	testsPassed: number, // computed
 
+	// Subset pattern; store only 10 tests max and implement pagination to
+	// retrieve more (others will be in separate collection)
 	tests: TestMetadataSchema[],
 	
 	sourceObjectUrl: string, // s3 object url to source code
@@ -73,18 +76,18 @@ export interface TestRunFileSchema {
 	}
 }
 
-// === Test Document Schema ===
+// === Test Metadata Document Schema ===
 // Currently embedded in TestRunFileSchema, but could turn into a standalone
 // document in the future as the # of tests increase
 
 // Data from a single test in the file
 export interface TestMetadataSchema {
-	// runId: ObjectId,
+	testRunFileId: ObjectId,
     suiteName?: string,
     testName: string,
     startTime: Date,
     duration: number,
-    status: RunStatus
+    status: RunStatus,
 	assets: TestAsset[] 
 }
 
