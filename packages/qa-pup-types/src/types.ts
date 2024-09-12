@@ -15,7 +15,9 @@ export interface DashboardSchema {
 	runId: ObjectId,
 	runType: RunType,
 	startTime: Date,
-	latestTests: LatestTestRunFile[],
+
+	// May need to turn into subset if # of test files increase in future
+	latestTests: LatestTestRunFile[], 
 
     // Information about initiating a manual run
 	manualRun: {

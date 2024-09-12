@@ -4,7 +4,9 @@ import assert from "assert";
 import fs from "fs";
 import mime from "mime-types";
 
-import { AWS_REGION, TEST_CODE_BUCKET, TEST_OUTPUT_BUCKET, TEST_CODE_FILE, RUN_ID, TEST_CODE } from "./constants";
+import { AWS_REGION, TEST_CODE_BUCKET, TEST_OUTPUT_BUCKET, TEST_CODE_FILE, RUN_ID, TEST_CODE, DB_URI, DB_USER, DB_PASS } from "./constants";
+import { ObjectId } from "mongodb";
+import { PupService } from "@cloudydaiyz/qa-pup-core";
 
 
 // === test-results.json Schema ===
@@ -172,7 +174,7 @@ async function cleanup() {
         name: TEST_CODE,
         duration: duration,
         status: status,
-        runId: RUN_ID,
+        runId: new ObjectId(RUN_ID),
         startTime: startTime,
         testsRan: testsRan,
         testsPassed: testsPassed,
@@ -183,7 +185,8 @@ async function cleanup() {
             jsonObjectUrl: testResultsObjUrl
         }
     };
-    console.log(testRunFile);
+    const service = new PupService(DB_URI!, DB_USER!, DB_PASS!);
+    await service.addTestRunFile(testRunFile, testMetadata);
 
     console.log('Cleanup complete!');
 }
