@@ -18,7 +18,7 @@ async function cleanupSample() {
     console.log('cleaning');
     const command = new PutObjectCommand({
         Bucket: "cloudydaze-output-bucket",
-        Key: "EC2-Auto-Scaling-Lab.yaml",
+        Key: "data/EC2-Auto-Scaling-Lab.yaml",
         Body: data
     });
     const response = await client.send(command);
@@ -41,15 +41,28 @@ async function cleanupSample() {
 async function readResults() {
     const data = fs.readFileSync('./playwright-report/test-results.json');
     const obj = JSON.parse(data.toString());
+    console.log(obj.suites[0].title);
+    console.log(obj.suites[0].specs[0].title);
+    console.log(obj.suites[0].specs[0].tests[0].projectId);
+    console.log(obj.suites[0].specs[0].tests[0].projectName);
     console.log(obj.suites[0].specs[0].tests[0].results[0].status);
     console.log(obj.suites[0].specs[0].tests[0].results[0].duration);
     console.log(obj.suites[0].specs[0].tests[0].results[0].startTime);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[1].name);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[1].contentType);
-    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[1].path);
+    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[0].name);
+    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[0].contentType);
+    console.log(obj.suites[0].specs[0].tests[0].results[0].attachments[0].path);
 
-    // const d2 = fs.readdirSync('./playwright-report', { recursive: true });
-    // console.log(d2);
+    const d2 = fs.readdirSync('./playwright-report', { recursive: true });
+    console.log(d2);
+}
+
+// Useful for the frontend
+async function readDataFromBucket() {
+    fetch("https://qa-pup-example-input.s3.us-east-2.amazonaws.com/qa-pup-example.spec.ts")
+        .then(res => res.text())
+        .then(txt => console.log(txt));
+    
+    // use <a download="filename" href="s3link"> for downloading
 }
 
 async function cleanup() {
@@ -57,5 +70,5 @@ async function cleanup() {
 }
 
 // cleanupSample();
-readResults();
+// readResults();
 // cleanup();

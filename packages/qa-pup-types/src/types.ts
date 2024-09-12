@@ -4,17 +4,6 @@ export type RunType = "MANUAL" | "SCHEDULED";
 export type RunStatus = "PASS" | "FAIL" | "ERROR";
 export type RunState = "RUNNING" | "AT REST";
 
-// === Test Run Schema ===
-
-export interface TestRunSchema {
-    docType: "TEST_RUN",
-
-    runId: ObjectId,
-    runType: RunType,
-    startTime: Date, 
-    emailList: string[]
-}
-
 // === Dashboard Document Schema ===
 
 // NOTE: The dashboard document has an _id of 1
@@ -74,28 +63,33 @@ export interface TestRunFileSchema {
 	startTime: Date,
 	testsRan: number,
 	testsPassed: number,
-	tests: TestMetadata[],
+
+	tests: TestMetadataSchema[],
 	
-	sourceCode: string, // download link to source code
+	sourceObjectUrl: string, // s3 object url to source code
 	reporters: {
-		htmlUri: string, // link to html reporter
-		htmlObjectKey: string, // s3 object key to html reporter
-		jsonObjectKey: string // s3 object key to json reporter
-	},
-	otherAssets: TestRunAsset[] 
+		htmlStaticUrl: string, // link from s3 static website to html reporter
+		jsonObjectUrl: string // s3 object url to json reporter
+	}
 }
 
+// === Test Document Schema ===
+// Currently embedded in TestRunFileSchema, but could turn into a standalone
+// document in the future as the # of tests increase
+
 // Data from a single test in the file
-export interface TestMetadata {
-    suiteName: string,
+export interface TestMetadataSchema {
+	// runId: ObjectId,
+    suiteName?: string,
     testName: string,
     startTime: Date,
     duration: number,
     status: RunStatus
+	assets: TestAsset[] 
 }
 
 // Asset generated from test run
-export interface TestRunAsset {
+export interface TestAsset {
     name: string, // name of asset
-    objectKey: string // s3 object key for asset
+    objectUrl: string // s3 object url for asset
 }
