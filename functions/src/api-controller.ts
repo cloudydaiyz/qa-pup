@@ -12,6 +12,14 @@ const dashboardPath = new Path("/:stage/dashboard");
 const latestTestPath = new Path("/:stage/latest-test/:runId/:name");
 const manualRunPath = new Path("/:stage/manual-run");
 
+// == Request Bodies 
+
+export interface ManualRunBody {
+    email: string;
+}
+
+export interface AddEmailBody extends ManualRunBody { }
+
 export const handler: APIGatewayProxyHandler = async (event, context) => {
     await pupCore.connection;
     const path = event.requestContext.path;

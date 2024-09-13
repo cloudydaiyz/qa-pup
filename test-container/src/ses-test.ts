@@ -46,3 +46,13 @@ const cmd5 = new GetIdentityVerificationAttributesCommand({
   // Identities: ["kyland03.biz@gmail.com"]
 });
 // client.send(cmd5).then(console.log);
+
+// use mjml.io to generate html emails
+// https://youtube.com/watch?v=64Ut2HZbyWw
+
+// https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ses_template
+// https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_CreateEmailTemplate.html
+
+// Account must be out of sandbox mode in order to send emails
+// https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#send-email-verify-address-custom
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/command/CreateCustomVerificationEmailTemplateCommand/

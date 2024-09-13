@@ -1,7 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult, WithId } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
-import { triggerKubernetesTestRun, sendTestCompletionEmails as sendTestCompletionEmails } from "./cloud";
+import { triggerKubernetesTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
 import assert from "assert";
 import { read } from "fs";
 
@@ -118,6 +118,8 @@ export class PupCore {
             );
         }
         assert(update.acknowledged && update.matchedCount == 1 && update.modifiedCount == 1);
+
+        await sendVerificationEmail(email);
     }
 }
 
