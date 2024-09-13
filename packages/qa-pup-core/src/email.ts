@@ -1,3 +1,7 @@
+import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import mjml from "mjml";
+
+const testCompletionEmailTemplate = `
 <mjml>
   <mj-head>
     <mj-font name="Rubik" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"></mj-font>
@@ -21,19 +25,10 @@
         <mj-button background-color="#FF6600" font-size="18px"><a href="#" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
         <mj-text>&nbsp;</mj-text>
         
-        <mj-text font-size="20px"><strong>Run ID:</strong> 12345</mj-text>
+        <mj-text font-size="20px"><strong>Run ID:</strong> <!-- Run ID --></mj-text>
         <mj-text>&nbsp;</mj-text>
         
-        
-        <mj-text font-size="20px"><strong>sortHackerNewsArticles</strong></mj-text>
-        <mj-text font-size="18px"><strong>Duration:</strong> 2000ms</mj-text>
-        <mj-text font-size="18px"><strong>Status:</strong> PASS</mj-text>
-        <mj-text>&nbsp;</mj-text>
-        
-        <mj-text font-size="20px"><strong>sortHackerNewsArticles2</strong></mj-text>
-        <mj-text font-size="18px">Duration: 2000ms</mj-text>
-        <mj-text font-size="18px">Status: PASS</mj-text>
-        <mj-text>&nbsp;</mj-text>
+        <!-- Run Info -->
       </mj-column>
     </mj-section>
     <mj-section>
@@ -43,3 +38,26 @@
     </mj-section>
   </mj-body>
 </mjml>
+`
+
+const testRunBlockTemplate = `
+        <mj-text font-size="20px"><strong><--! name --></strong></mj-text>
+        <mj-text font-size="18px">Duration: <--! duration --></mj-text>
+        <mj-text font-size="18px">Status: <--! status --></mj-text>
+        <mj-text>&nbsp;</mj-text>
+
+`
+
+export function composeEmailBody(runId: string, testRuns: TestRunFileSchema[]): string {
+    let testRunBlocks = "";
+    for(const testRun of testRuns) {
+        testRunBlocks += testRunBlockTemplate
+            .replace("<!-- name -->", testRun.name)
+            .replace("<!-- duration -->", testRun.duration.toString())
+            .replace("<!-- status -->", testRun.status);
+    }
+    
+    return testCompletionEmailTemplate
+        .replace("<!-- Run ID -->", runId)
+        .replace("<!-- Run Info -->", testRunBlocks);
+}

@@ -3,7 +3,6 @@ import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult, WithId }
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
 import { triggerKubernetesTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
 import assert from "assert";
-import { read } from "fs";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
 type TestMetadataCollection = TestMetadataSchema;
@@ -130,6 +129,7 @@ export class PupService extends PupCore {
     public async testCompletion(): Promise<void> {
         const dashboard = await this.readDashboardInfo();
 
+        // Obtain information from the dashboard
         const latestTestRuns = await this.testRunColl.find(
             { docType: "TEST_RUN_FILE", runId: dashboard.currentRun.runId },
             { 
@@ -138,7 +138,7 @@ export class PupService extends PupCore {
         ).toArray() as TestRunFileSchema[];
 
         // Set the latest test run info in the dashboard
-        const updatedDashboard = await this.testRunColl.findOneAndUpdate(
+        const updateDashboard = await this.testRunColl.updateOne(
             { docType: "DASHBOARD" }, 
             {
                 $set: {
@@ -151,14 +151,18 @@ export class PupService extends PupCore {
                     }
                 }
             }, 
-            { returnDocument: "after" }
-        ) as WithId<DashboardSchema>;
-        assert(updatedDashboard);
+        );
+        assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 
+            && updateDashboard.modifiedCount == 1);
         
         // Send test completion emails
-        assert(updatedDashboard.currentRun.emailList);
-        if(updatedDashboard.currentRun.emailList.length > 0) {
-            sendTestCompletionEmails(updatedDashboard.currentRun.emailList);
+        if(dashboard.currentRun.emailList!.length > 0) {
+            await sendTestCompletionEmails(
+                dashboard.currentRun.emailList!, 
+                dashboard.nextScheduledRun.emailList,
+                dashboard.currentRun.runId!, 
+                latestTestRuns, 
+            );
         }
     }
     
@@ -175,15 +179,17 @@ export class PupService extends PupCore {
             } }
         ));
 
-        // Removes tests that are over a week old from the database
-        const oldTests = await this.testRunColl.find({ 
+        // Remove old tests and their metadata from the database
+        const oldTestIds = await this.testRunColl.find({ 
             docType: "TEST_RUN_FILE", 
             startTime: { $lt: new Date(Date.now() - TEST_LIFETIME) } 
-        }).toArray() as WithId<TestRunFileSchema>[];
+        }).toArray().then(docs => docs.map(test => test._id));
 
-        // Delete test from database & old test artifacts from S3 bucket
         operations.push(this.testRunColl.deleteMany(
-            { _id: { $in: oldTests.map(test => test._id) } }
+            { _id: { $in: oldTestIds } }
+        ));
+        operations.push(this.testMetadataColl.deleteMany(
+            { testRunFileId: { $in: oldTestIds } }
         ));
 
         // Wait for all the cleanup operations to finish

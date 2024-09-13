@@ -11,12 +11,14 @@
   "license": "ISC",
   "description": "Core functionality for the qa-pup project",
   "dependencies": {
+    "mjml": "^4.15.3",
     "mongodb": "^6.8.1"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.649.0",
     "@aws-sdk/client-ses": "^3.650.0",
     "@cloudydaiyz/qa-pup-types": "^2.1.0",
+    "@types/mjml": "^4.7.4",
     "@types/node": "^22.5.4"
   },
   "files": [
