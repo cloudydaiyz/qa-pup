@@ -8,12 +8,12 @@
   <mj-body>
     <mj-section>
       <mj-column>
-        <mj-text font-size="30px" align="center" color="#F45E43">QA Pup</mj-text>
-        <mj-divider border-color="#F45E43"></mj-divider>
+        <mj-text font-size="30px" align="center" color="#FF6600">QA Pup</mj-text>
+        <mj-divider border-color="#FF6600"></mj-divider>
         
         <mj-image width="200px" src="https://raw.githubusercontent.com/cloudydaiyz/qa-pup/refs/heads/develop/assets/pups.png"></mj-image>
-        <mj-text font-size="30px" align="center" color="#F45E43">The test run has completed</mj-text>
-        <mj-button background-color="#F45E43" font-size="18px"><a href="#" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
+        <mj-text font-size="30px" align="center" color="#FF6600">The test run has completed</mj-text>
+        <mj-button background-color="#FF6600" font-size="18px"><a href="#" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
         <mj-text>&nbsp;</mj-text>
         
         <mj-text font-size="20px"><strong>Run ID:</strong> 12345</mj-text>

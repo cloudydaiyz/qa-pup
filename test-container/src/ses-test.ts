@@ -49,7 +49,44 @@ const cmd5 = new GetIdentityVerificationAttributesCommand({
 });
 // client.send(cmd5).then(console.log);
 
-const template = fs.readFileSync("./template/test-completion-example.mjml", "utf-8");
+// const template = fs.readFileSync("./template/test-completion-example.mjml", "utf-8");
+const template = `
+<!-- https://mjml.io/try-it-live/TG0Flliexv -->
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Montserrat, Arial, sans-serif"></mj-all>
+    </mj-attributes>
+  </mj-head>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="30px" align="center" color="#FF6600">QA Pup</mj-text>
+        <mj-divider border-color="#FF6600"></mj-divider>
+        
+        <mj-image width="200px" src="https://raw.githubusercontent.com/cloudydaiyz/qa-pup/refs/heads/develop/assets/pups.png"></mj-image>
+        <mj-text font-size="30px" align="center" color="#FF6600">The test run has completed</mj-text>
+        <mj-button background-color="#FF6600" font-size="18px"><a href="#" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
+        <mj-text>&nbsp;</mj-text>
+        
+        <mj-text font-size="20px"><strong>Run ID:</strong> 12345</mj-text>
+        <mj-text>&nbsp;</mj-text>
+        
+        
+        <mj-text font-size="20px"><strong>sortHackerNewsArticles</strong></mj-text>
+        <mj-text font-size="18px"><strong>Duration:</strong> 2000ms</mj-text>
+        <mj-text font-size="18px"><strong>Status:</strong> PASS</mj-text>
+        <mj-text>&nbsp;</mj-text>
+        
+        <mj-text font-size="20px"><strong>sortHackerNewsArticles2</strong></mj-text>
+        <mj-text font-size="18px">Duration: 2000ms Hello world</mj-text>
+        <mj-text font-size="18px">Status: PASS</mj-text>
+        <mj-text>&nbsp;</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+`;
 const output = mjml(template);
 fs.writeFileSync('./template-html/test-completion-example.html', output.html);
 
