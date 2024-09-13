@@ -52,6 +52,13 @@ const cmd5 = new GetIdentityVerificationAttributesCommand({
 const template = fs.readFileSync("./template/test-completion-example.mjml", "utf-8");
 const output = mjml(template);
 fs.writeFileSync('./template-html/test-completion-example.html', output.html);
+
+const template2 = fs.readFileSync("./template/test-completion.mjml", "utf-8")
+  .replace("<!-- Run ID placeholder -->", "Hello world")
+  .replace("<!-- Run info placeholder -->", "Blah blah blah");
+const output2 = mjml(template2);
+fs.writeFileSync('./template-html/test-completion.html', output2.html);
+
 // console.log(output.html);
 
 // use mjml.io to generate html emails
