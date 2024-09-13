@@ -1,10 +1,19 @@
-import { S3Client, DeleteObjectsCommand, PutObjectCommand, ObjectIdentifier } from "@aws-sdk/client-s3"; // ES Modules import
-import { TEST_ARTIFACTS_BUCKET } from "./constants";
 import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 
 
 // TODO: Initiate Kubernetes test run
-export async function initiateKubernetesTestRun() { }
+export async function triggerKubernetesTestRun() { }
+
+
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/command/SendCustomVerificationEmailCommand/
+export async function sendVerificationEmail(email: string) {
+
+}
 
 // TODO: Send test completion email via SES
-function sendTestCompletionEmail(emailList: string[]) { }
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/command/GetIdentityVerificationAttributesCommand/
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/command/SendTemplatedEmailCommand/
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/command/DeleteIdentityCommand/
+export async function sendTestCompletionEmails(emailList: string[]) { 
+
+}

@@ -12,37 +12,37 @@ import { PupService } from "@cloudydaiyz/qa-pup-core";
 // === test-results.json Schema ===
 
 export interface TestResultsJson {
-	suites: { // usually only one member
-		title: string; // file name
-		specs: TestSpecs[]; // top level tests
-		suites: { // multiple test suites
-			title: string, // suite name
-			specs: TestSpecs[] // tests for a specific test suite
-		}[];
-	}[];
+    suites: { // usually only one member
+        title: string; // file name
+        specs: TestSpecs[]; // top level tests
+        suites: { // multiple test suites
+            title: string, // suite name
+            specs: TestSpecs[] // tests for a specific test suite
+        }[];
+    }[];
 
-	stats: {
-		startTime: string, // overall start time
-		duration: number // overall duration
-	};
+    stats: {
+        startTime: string, // overall start time
+        duration: number // overall duration
+    };
 }
 
 export interface TestSpecs { // usually one for each project and test
-	title: string,
-	file: string,
-	tests: { // usually only one member
-		projectName: string,
-		results: { // usually only one member
-			startTime: string,
-			duration: number,
-			status: string,
-			attachments: { // test can have multiple attachments
-				name: string,
-				contentType: string,
-				path: string
-			}[];
-		}[];
-	}[];
+    title: string,
+    file: string,
+    tests: { // usually only one member
+        projectName: string,
+        results: { // usually only one member
+            startTime: string,
+            duration: number,
+            status: string,
+            attachments: { // test can have multiple attachments
+                name: string,
+                contentType: string,
+                path: string
+            }[];
+        }[];
+    }[];
 }
 
 // Useful for the frontend

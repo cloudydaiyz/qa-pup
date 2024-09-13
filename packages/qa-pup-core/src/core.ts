@@ -1,7 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult, WithId } from "mongodb";
-import { DB_NAME, FULL_DAY, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
-import { initiateKubernetesTestRun } from "./cloud";
+import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
+import { triggerKubernetesTestRun, sendTestCompletionEmails as sendTestCompletionEmails } from "./cloud";
 import assert from "assert";
 import { read } from "fs";
 
@@ -37,7 +37,15 @@ export class PupCore {
     }
     
     public async triggerRun(runType: RunType, email?: string): Promise<boolean> {
+        const dashboard = await this.readDashboardInfo();
         let userInEmailList = true;
+
+        assert(dashboard.currentRun.state == "AT REST", "A test run is already in progress");
+        assert(
+            runType == "SCHEDULED" 
+            || Date.now() + FULL_HOUR < dashboard.nextScheduledRun.startTime.getTime(), 
+            "Cannot trigger a test run within an hour of a scheduled run."
+        );
 
         // Init the filter to update the test run collection
         let emailList = email ? [ email ] : [];
@@ -54,7 +62,6 @@ export class PupCore {
         };
 
         // Update the filter based on the run type
-        const dashboard = await this.readDashboardInfo();
         if(runType == "SCHEDULED") {
             
             // Update the stats of the next scheduled run
@@ -64,7 +71,7 @@ export class PupCore {
 
             updateFilter.$set = {
                 ...updateFilter.$set, 
-                    nextScheduledRun: {
+                nextScheduledRun: {
                     startTime: new Date(Date.now() + FULL_DAY),
                     emailList: emailList
                 }
@@ -80,12 +87,13 @@ export class PupCore {
         await this.testRunColl.updateOne({ docType: "DASHBOARD" }, updateFilter);
 
         // Start the test runs in the kubernetes cluster
-        await initiateKubernetesTestRun();
+        await triggerKubernetesTestRun();
 
         // Return whether the user was in the email list or not
         return userInEmailList;
     }
 
+    // Adds an email to the list of emails to be notified for the current or next scheduled run
     public async addToEmailList(email: string, current?: boolean): Promise<void> {
         let update: UpdateResult;
         if(current) {
@@ -127,6 +135,12 @@ export class PupService extends PupCore {
             }
         ).toArray() as TestRunFileSchema[];
 
+        // Send test completion emails
+        assert(dashboard.currentRun.emailList);
+        if(dashboard.currentRun.emailList.length > 0) {
+            sendTestCompletionEmails(dashboard.currentRun.emailList);
+        }
+
         // Set the latest test run info in the dashboard
         const updateDashboard = await this.testRunColl.updateOne({ docType: "DASHBOARD" }, {
             $set: {
@@ -141,8 +155,6 @@ export class PupService extends PupCore {
         });
         assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 
             && updateDashboard.modifiedCount == 1);
-
-        // Send test completion emails
     }
     
     // Handles the cleanup of old tests and manual run refreshes

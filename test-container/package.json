@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "tsc && node scripts/ses-test.js",
     "pretest": "tsc && node scripts/prepare-test.js",
     "test": "playwright test || true",
     "posttest": "node scripts/cleanup-test.js"
@@ -12,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@aws-sdk/client-ses": "^3.650.0",
     "@cloudydaiyz/qa-pup-types": "^2.1.0",
     "@playwright/test": "^1.47.0",
     "@types/mime-types": "^2.1.4",
