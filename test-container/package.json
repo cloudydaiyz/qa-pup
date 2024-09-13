@@ -1,5 +1,7 @@
 {
   "name": "qa-pup-test-container",
+  "author": "Kylan Duncan",
+  "license": "ISC",
   "version": "1.0.0",
   "scripts": {
     "build": "playwright install && tsc",
@@ -8,21 +10,16 @@
     "test": "playwright test || true",
     "posttest": "node scripts/cleanup-test.js"
   },
-  "author": "Kylan Duncan",
-  "license": "ISC",
   "devDependencies": {
-    "@aws-sdk/client-ses": "^3.650.0",
     "@cloudydaiyz/qa-pup-types": "^2.1.0",
     "@playwright/test": "^1.47.0",
     "@types/mime-types": "^2.1.4",
-    "@types/mjml": "^4.7.4",
     "@types/node": "^22.5.4"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.649.0",
     "@cloudydaiyz/qa-pup-core": "^1.2.0",
     "mime-types": "^2.1.35",
-    "mjml": "^4.15.3",
     "mongodb": "^6.9.0"
   }
 }

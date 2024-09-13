@@ -1,13 +1,11 @@
 {
   "name": "@cloudydaiyz/qa-pup-aws-lambda",
+  "author": "Kylan Duncan",
+  "license": "ISC",
   "version": "1.0.0",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "Kylan Duncan",
-  "license": "ISC",
-  "description": "AWS Lambda controller function definitions for qa-pup project",
   "dependencies": {
     "@cloudydaiyz/qa-pup-core": "^1.1.0",
     "mongodb": "^6.8.1",

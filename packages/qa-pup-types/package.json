@@ -1,22 +1,16 @@
 {
   "name": "@cloudydaiyz/qa-pup-types",
+  "description": "Type definitions for the qa-pup project",
+  "keywords": ["qa-pup", "types"],
+  "author": "Kylan Duncan",
+  "license": "ISC",
   "version": "2.1.0",
   "types": "lib/types.d.ts",
   "scripts": {
     "prepublish": "tsc"
   },
-  "keywords": [
-    "qa-pup",
-    "types"
-  ],
-  "author": "Kylan Duncan",
-  "license": "ISC",
-  "description": "TypeScript types for the qa-pup project",
   "devDependencies": {
     "mongodb": "^6.8.1"
   },
-  "files": [
-    "lib",
-    "package.json"
-  ]
+  "files": ["lib", "package.json"]
 }
