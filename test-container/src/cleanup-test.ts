@@ -1,5 +1,5 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { LatestTestRunFile, RunStatus, TestAsset, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { RunStatus, TestAsset, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import assert from "assert";
 import fs from "fs";
 import mime from "mime-types";

@@ -1,3 +1,11 @@
+Create a Dockerfile that:
+    - makes a workdir in 
+    - copies src to the workdir
+
+# https://docs.docker.com/reference/dockerfile/#run---mounttypesecret
+# https://docs.docker.com/build/building/secrets/
+# https://docs.docker.com/reference/cli/docker/buildx/build/#secret
+
 # `npm install --save-dev @playwright/test` - installs Playwright Test
 # `npm install --save-dev @types/node` - installs types
 # `npx playwright install` - installs playwright browsers
