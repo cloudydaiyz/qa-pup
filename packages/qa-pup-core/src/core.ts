@@ -137,26 +137,29 @@ export class PupService extends PupCore {
             }
         ).toArray() as TestRunFileSchema[];
 
-        // Send test completion emails
-        assert(dashboard.currentRun.emailList);
-        if(dashboard.currentRun.emailList.length > 0) {
-            sendTestCompletionEmails(dashboard.currentRun.emailList);
-        }
-
         // Set the latest test run info in the dashboard
-        const updateDashboard = await this.testRunColl.updateOne({ docType: "DASHBOARD" }, {
-            $set: {
-                runId: dashboard.currentRun.runId,
-                runType: dashboard.currentRun.runType,
-                startTime: dashboard.currentRun.startTime,
-                latestTests: latestTestRuns,
-                currentRun: {
-                    state: "AT REST"
+        const updatedDashboard = await this.testRunColl.findOneAndUpdate(
+            { docType: "DASHBOARD" }, 
+            {
+                $set: {
+                    runId: dashboard.currentRun.runId,
+                    runType: dashboard.currentRun.runType,
+                    startTime: dashboard.currentRun.startTime,
+                    latestTests: latestTestRuns,
+                    currentRun: {
+                        state: "AT REST"
+                    }
                 }
-            }
-        });
-        assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 
-            && updateDashboard.modifiedCount == 1);
+            }, 
+            { returnDocument: "after" }
+        ) as WithId<DashboardSchema>;
+        assert(updatedDashboard);
+        
+        // Send test completion emails
+        assert(updatedDashboard.currentRun.emailList);
+        if(updatedDashboard.currentRun.emailList.length > 0) {
+            sendTestCompletionEmails(updatedDashboard.currentRun.emailList);
+        }
     }
     
     // Handles the cleanup of old tests and manual run refreshes

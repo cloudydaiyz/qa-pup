@@ -1,4 +1,6 @@
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, ListIdentitiesCommand, SendEmailCommand, SendEmailRequest, SESClient, VerifyEmailIdentityCommand } from '@aws-sdk/client-ses';
+import mjml from "mjml";
+import fs from "fs";
 
 const client = new SESClient();
 const input: SendEmailRequest = {
@@ -6,20 +8,20 @@ const input: SendEmailRequest = {
   Destination: {
     CcAddresses: [],
     ToAddresses: [
-      // "kyland03.biz@gmail.com",
-      "kduncan@utexas.edu",
+      "kyland03.biz@gmail.com",
+      // "kduncan@utexas.edu",
     ],
   },
   Message: {
     Body: {
-      // Html: {
-      //   Charset: "UTF-8",
-      //   Data: "This message body contains HTML formatting. It can, for example, contain links like this one: <a class=\"ulink\" href=\"http://docs.aws.amazon.com/ses/latest/DeveloperGuide\" target=\"_blank\">Amazon SES Developer Guide</a>."
-      // },
-      Text: {
+      Html: {
         Charset: "UTF-8",
-        Data: "This is the message body in text format."
-      }
+        Data: "This message body contains HTML formatting. It can, for example, contain links like this one: <a class=\"ulink\" href=\"http://docs.aws.amazon.com/ses/latest/DeveloperGuide\" target=\"_blank\">Amazon SES Developer Guide</a>."
+      },
+      // Text: {
+      //   Charset: "UTF-8",
+      //   Data: "This is the message body in text format."
+      // }
     },
     Subject: {
       Charset: "UTF-8",
@@ -34,7 +36,7 @@ const cmd2 = new DeleteIdentityCommand({ Identity: "kduncan@utexasedu" });
 // client.send(cmd2);
 
 const cmd3 = new ListIdentitiesCommand({ IdentityType: "EmailAddress" });
-client.send(cmd3).then(console.log);
+// client.send(cmd3).then(console.log);
 
 // can send this multiple times
 // Does NOT verify if the email is valid -- adds it to the list of identities regardless
@@ -46,6 +48,11 @@ const cmd5 = new GetIdentityVerificationAttributesCommand({
   // Identities: ["kyland03.biz@gmail.com"]
 });
 // client.send(cmd5).then(console.log);
+
+const template = fs.readFileSync("./template/test-completion-example.mjml", "utf-8");
+const output = mjml(template);
+fs.writeFileSync('./template-html/test-completion-example.html', output.html);
+// console.log(output.html);
 
 // use mjml.io to generate html emails
 // https://youtube.com/watch?v=64Ut2HZbyWw

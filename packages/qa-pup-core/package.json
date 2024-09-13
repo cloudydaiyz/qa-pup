@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.649.0",
+    "@aws-sdk/client-ses": "^3.650.0",
     "@cloudydaiyz/qa-pup-types": "^2.1.0",
     "@types/node": "^22.5.4"
   },

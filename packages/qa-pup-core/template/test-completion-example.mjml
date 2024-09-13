@@ -16,10 +16,19 @@
         <mj-button background-color="#F45E43" font-size="18px"><a href="#" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
         <mj-text>&nbsp;</mj-text>
         
-        <mj-text font-size="20px"><strong>Run ID:</strong><!-- Run ID placeholder --></mj-text>
+        <mj-text font-size="20px"><strong>Run ID:</strong> 12345</mj-text>
         <mj-text>&nbsp;</mj-text>
         
-        <!-- Run info placeholder -->
+        
+        <mj-text font-size="20px"><strong>sortHackerNewsArticles</strong></mj-text>
+        <mj-text font-size="18px"><strong>Duration:</strong> 2000ms</mj-text>
+        <mj-text font-size="18px"><strong>Status:</strong> PASS</mj-text>
+        <mj-text>&nbsp;</mj-text>
+        
+        <mj-text font-size="20px"><strong>sortHackerNewsArticles2</strong></mj-text>
+        <mj-text font-size="18px">Duration: 2000ms</mj-text>
+        <mj-text font-size="18px">Status: PASS</mj-text>
+        <mj-text>&nbsp;</mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
