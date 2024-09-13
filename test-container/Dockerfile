@@ -1,6 +1,10 @@
-Create a Dockerfile that:
-    - makes a workdir in 
-    - copies src to the workdir
+# Create a Dockerfile that:
+#     - makes a workdir in `/app`
+#     - copies `src/`, `package-lock.json`, `package.json`, `playwright.config.ts`, `tsconfig.json` to the workdir
+#     - installs node & typescript
+#     - `npm install` dependencies (`npm ci`)
+#     - run `npm build`
+#     - run `npm test` with env variables as secrets
 
 # https://docs.docker.com/reference/dockerfile/#run---mounttypesecret
 # https://docs.docker.com/build/building/secrets/

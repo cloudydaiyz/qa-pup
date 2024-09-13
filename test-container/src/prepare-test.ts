@@ -9,7 +9,7 @@ async function prepare() {
     console.log('Preparing test...');
 
     // Obtain test code file from S3 bucket
-    const client = new S3Client({ region: AWS_REGION });
+    const client = new S3Client({ region: AWS_REGION, credentials: { accessKeyId: "", secretAccessKey: "" } });
     const command = new GetObjectCommand({
         Bucket: TEST_CODE_BUCKET,
         Key: TEST_CODE_FILE

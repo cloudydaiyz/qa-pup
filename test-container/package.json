@@ -1,17 +1,15 @@
 {
-  "name": "test-container",
+  "name": "qa-pup-test-container",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
+    "build": "playwright install && tsc",
     "start": "tsc && node scripts/ses-test.js",
-    "pretest": "tsc && node scripts/prepare-test.js",
+    "pretest": "npm build && node scripts/prepare-test.js",
     "test": "playwright test || true",
     "posttest": "node scripts/cleanup-test.js"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Kylan Duncan",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@aws-sdk/client-ses": "^3.650.0",
     "@cloudydaiyz/qa-pup-types": "^2.1.0",
