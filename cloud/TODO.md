@@ -1,5 +1,4 @@
 - For api gateway, specify the payload format version to be 1.0
 - Use parameter store to store secrets (note: SecureString uses KMS)
 - Initialize ECS cluster for tasks
-- Include AWS_ACCESS_KEY, AWS_ACCESS_SECRET, AWS_REGION, DB_URI, DB_USER, and DB_PASS in secrets for task definition
 - Initialize DynamoDB table
