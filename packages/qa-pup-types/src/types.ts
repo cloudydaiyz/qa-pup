@@ -11,12 +11,13 @@ export type RunState = "RUNNING" | "AT REST";
 export interface DashboardSchema {
 	docType: "DASHBOARD",
 
-	// Information for the latest test run
+	// Overall information for the latest test run
 	runId: ObjectId,
 	runType: RunType,
 	startTime: Date,
 
-	// May need to turn into subset if # of test files increase in future
+	// Information about each file in the latest test run
+	// NOTE: May need to turn into subset if # of test files increase enough in future
 	latestTests: LatestTestRunFile[], 
 
     // Information about initiating a manual run
@@ -51,7 +52,7 @@ export interface LatestTestRunFile {
 
 // === Test Run File Document Schema ===
 
-// Test Run for a tests defined in one file
+// Test Run for tests defined in one file
 export interface TestRunFileSchema {
 	docType: "TEST_RUN_FILE",
 	
@@ -62,7 +63,6 @@ export interface TestRunFileSchema {
 
 	// Test information
 	runId: ObjectId,
-	// description: string, // description for test file
 	startTime: Date, // computed, earliest start time of all tests
 	testsRan: number, // computed
 	testsPassed: number, // computed

@@ -1,12 +1,11 @@
-import { DashboardSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, SendEmailCommand, SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
 import { ObjectId } from "mongodb";
 import { composeEmailBody } from "./email";
-import { AWS_CONFIG } from "./constants";
 
 // Sends AWS boilerplate email to verify an email address for sending
 export async function sendVerificationEmail(email: string): Promise<void> {
-    const client = new SESClient(AWS_CONFIG);
+    const client = new SESClient();
     const cmd = new VerifyEmailIdentityCommand({ EmailAddress: email });
     await client.send(cmd);
 }
@@ -15,7 +14,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
 export async function sendTestCompletionEmails(
     emailList: string[], nextRunEmailList: string[], 
     runId: ObjectId, latestTestRuns: TestRunFileSchema[]): Promise<void> { 
-    const client = new SESClient(AWS_CONFIG);
+    const client = new SESClient();
 
     // Retrieve only the verified emails from the list
     const getVerifications = new GetIdentityVerificationAttributesCommand(
@@ -60,7 +59,27 @@ export async function sendTestCompletionEmails(
     }
 }
 
-// TODO: Initiate ECS test run
+// Initiates ECS task for the test run
 export async function triggerEcsTestRun() { 
-    
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/RegisterTaskDefinitionCommand/
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/eventbridge/command/PutRuleCommand/
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/StartTaskCommand/
+        // override environment variables TEST_CODE_BUCKET, TEST_CODE_FILE, TEST_OUTPUT_BUCKET, and RUN_ID
+}
+
+// true if all tasks have completed, false otherwise
+export async function isEcsTestRunComplete(): Promise<boolean> {
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/ListTasksCommand/
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/DescribeTasksCommand/
+    return true;
+}
+
+// Cleans up all cloud resources associated with a test run
+export async function cleanupEcsTestRun() {
+    // Deregister and delete ECS task definition associated with a test run
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/DeregisterTaskDefinitionCommand/
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/DeleteTaskDefinitionsCommand/
+
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/eventbridge/command/RemoveTargetsCommand/
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/eventbridge/command/DeleteRuleCommand/
 }

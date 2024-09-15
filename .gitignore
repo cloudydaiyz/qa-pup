@@ -3,6 +3,7 @@ lib
 .DS_Store
 SECRETS.MD
 ENV.MD
+secrets.sh
 
 # == Terraform ==
 

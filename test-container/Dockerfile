@@ -6,6 +6,7 @@
 #     - run `npm build`
 #     - run `npm test`
 
+# Might not need this anymore based on ECS secret passing
 # https://docs.docker.com/reference/dockerfile/#run---mounttypesecret
 # https://docs.docker.com/build/building/secrets/
 # https://docs.docker.com/reference/cli/docker/buildx/build/#secret

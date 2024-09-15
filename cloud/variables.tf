@@ -1,11 +1,16 @@
+variable "aws_region" {
+  type        = string
+  description = "AWS region to deploy resources in."
+}
+
 variable "db_user" {
   type        = string
-  description = "description"
+  description = "MongoDB database username"
 }
 
 variable "db_pass" {
   type        = string
-  description = "description"
+  description = "MongoDB database password"
 }
 
 variable "sender_email" {

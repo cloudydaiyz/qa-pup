@@ -5,7 +5,6 @@
   "version": "1.0.0",
   "scripts": {
     "build": "playwright install && tsc",
-    "start": "tsc && node scripts/ses-test.js",
     "pretest": "npm build && node scripts/prepare-test.js",
     "test": "playwright test || true",
     "posttest": "node scripts/cleanup-test.js"

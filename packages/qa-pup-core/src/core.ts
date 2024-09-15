@@ -1,7 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
-import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult, WithId } from "mongodb";
+import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
-import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
+import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail, cleanupEcsTestRun } from "./cloud";
 import assert from "assert";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
@@ -37,11 +37,13 @@ export class PupCore {
         return testInfo;
     }
     
-    // Triggers a scheduled or manual test run with the specified email on the email list
-    public async triggerRun(runType: RunType, email?: string): Promise<boolean> {
-        const dashboard = await this.readDashboardInfo();
-        let userInEmailList = true;
+    // Triggers a scheduled or manual test run with the optionally specified email on the email list
+    // NOTE: Scheduled runs can't have with the email parameter
+    public async triggerRun(runType: RunType, email?: string): Promise<void> {
+        assert(runType == "MANUAL" || !email, "Scheduled runs cannot have an email parameter");
 
+        // Obtain and validate parameters against the dashboard
+        const dashboard = await this.readDashboardInfo();
         assert(dashboard.currentRun.state == "AT REST", "A test run is already in progress");
         assert(
             runType == "SCHEDULED" 
@@ -67,36 +69,33 @@ export class PupCore {
         if(runType == "SCHEDULED") {
             
             // Update the stats of the next scheduled run
-            const scheduleList = dashboard.nextScheduledRun.emailList.slice(0, 10);
-            userInEmailList = scheduleList.length < 10;
-            emailList = userInEmailList ? scheduleList.concat(emailList) : scheduleList;
-
+            const scheduleList = dashboard.nextScheduledRun.emailList;
             updateFilter.$set = {
                 ...updateFilter.$set, 
                 nextScheduledRun: {
                     startTime: new Date(Date.now() + FULL_DAY),
-                    emailList: emailList
+                    emailList: []
                 }
             };
+            updateFilter.$set.currentRun.emailList = scheduleList;
         } else {
             assert(dashboard.manualRun.remaining > 0, "No manual runs remaining for today");
 
             // Decrement the remaining amount of manual runs
-            updateFilter.$inc = { "manualRun.remaining": -1 }
+            updateFilter.$inc = { "manualRun.remaining": -1 };
         }
 
         // Update the test run collection with the new run info
-        await this.testRunColl.updateOne({ docType: "DASHBOARD" }, updateFilter);
+        const updateDashboard = await this.testRunColl.updateOne({ docType: "DASHBOARD" }, updateFilter);
+        assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 && updateDashboard.modifiedCount == 1, "Dashboard update failed");
 
         // Start the test runs in the kubernetes cluster
         await triggerEcsTestRun();
-
-        // Return whether the user was in the email list or not
-        return userInEmailList;
     }
 
     // Adds an email to the list of emails to be notified for the current or next scheduled run
-    public async addToEmailList(email: string, current?: boolean): Promise<void> {
+    // Returns true if the email was successfully added, false otherwise
+    public async addToEmailList(email: string, current?: boolean): Promise<boolean> {
         let update: UpdateResult;
         if(current) {
 
@@ -106,22 +105,33 @@ export class PupCore {
                 { 
                     docType: "DASHBOARD", 
                     "currentRun.status": "RUNNING", 
-                    "currentRun.emailList": { $size: { $lt: 10 } } 
+                    "currentRun.emailList": { 
+                        $size: { $lt: 10 },
+                        $elemMatch: { $ne: email } 
+                    } 
                 }, 
-                { $addToSet: { emailList: email } }
+                { $addToSet: { "currentRun.emailList": email } }
             );
         } else {
 
             // Add the email to the list of emails to be notified for the next scheduled run 
             // if the max number of emails has not been reached
             update = await this.testRunColl.updateOne(
-                { docType: "DASHBOARD", "nextScheduledRun.emailList": { $size: { $lt: 10 } } }, 
+                { 
+                    docType: "DASHBOARD", 
+                    "nextScheduledRun.emailList": { 
+                        $size: { $lt: 10 }, 
+                        $elemMatch: { $ne: email }  
+                    } 
+                }, 
                 { $addToSet: { "nextScheduledRun.emailList": email } }
             );
         }
-        assert(update.acknowledged && update.matchedCount == 1 && update.modifiedCount == 1);
+        assert(update.acknowledged);
 
-        await sendVerificationEmail(email);
+        const addSuccess = update.modifiedCount == 1;
+        if(addSuccess) await sendVerificationEmail(email);
+        return addSuccess;
     }
 }
 
@@ -167,6 +177,9 @@ export class PupService extends PupCore {
                 latestTestRuns, 
             );
         }
+
+        // Cleanup leftover artifacts from setting up the ECS test run
+        await cleanupEcsTestRun();
     }
     
     // Handles the cleanup of old tests and manual run refreshes

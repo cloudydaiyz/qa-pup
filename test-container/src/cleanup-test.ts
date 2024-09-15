@@ -163,10 +163,9 @@ async function cleanup() {
     // Compute overall test statistics from file
     const status = testsRan == testsPassed ? "PASSED" : "FAILED";
 
-    // TODO: Store corresponding test data in MongoDB
+    // Store corresponding test data in MongoDB
     console.log("Sending test results to database...");
-
-    // Create new documents for the test run
+    
     const indexUrl = `http://${TEST_OUTPUT_BUCKET}.s3-website.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/index.html`;
     const testResultsObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/test-results.json`;
     const testRunFile: TestRunFileSchema = {
