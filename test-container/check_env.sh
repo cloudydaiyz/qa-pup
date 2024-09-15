@@ -1,0 +1,1 @@
+# Checks if the necessary environment variables are set

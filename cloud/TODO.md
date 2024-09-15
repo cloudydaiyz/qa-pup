@@ -1,1 +1,2 @@
 - For api gateway, specify the payload format version to be 1.0
+- Use parameter store to store secrets (note: SecureString uses KMS)

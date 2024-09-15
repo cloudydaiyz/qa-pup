@@ -1,7 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult, WithId } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
-import { triggerKubernetesTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
+import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
 import assert from "assert";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
@@ -21,12 +21,14 @@ export class PupCore {
         this.connection = this.client.connect();
     }
 
+    // Obtains the current dashboard info
     public async readDashboardInfo(): Promise<DashboardSchema> {
         const dashboard = await this.testRunColl.findOne({ docType: "DASHBOARD" }) as DashboardSchema;
         assert(dashboard, "MongoDB improperly initialized");
         return dashboard;
     }
     
+    // Obtains the info for a specific test run
     public async readLatestTestInfo(runId: ObjectId, name: string): Promise<TestRunFileSchema> {
         const testInfo = await this.testRunColl.findOne(
             { docType: "TEST_RUN_FILE", runId, name }
@@ -35,6 +37,7 @@ export class PupCore {
         return testInfo;
     }
     
+    // Triggers a scheduled or manual test run with the specified email on the email list
     public async triggerRun(runType: RunType, email?: string): Promise<boolean> {
         const dashboard = await this.readDashboardInfo();
         let userInEmailList = true;
@@ -86,7 +89,7 @@ export class PupCore {
         await this.testRunColl.updateOne({ docType: "DASHBOARD" }, updateFilter);
 
         // Start the test runs in the kubernetes cluster
-        await triggerKubernetesTestRun();
+        await triggerEcsTestRun();
 
         // Return whether the user was in the email list or not
         return userInEmailList;

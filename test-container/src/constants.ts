@@ -13,10 +13,9 @@ export const DB_URI = process.env.DB_URI; // "mongodb://localhost:27017";
 export const DB_USER = process.env.DB_USER; // "root";
 export const DB_PASS = process.env.DB_PASS; // "password";
 
-assert(TEST_CODE_FILE && TEST_CODE_BUCKET 
-    && TEST_OUTPUT_BUCKET && AWS_REGION && RUN_ID 
+assert(TEST_CODE_FILE && TEST_CODE_BUCKET && TEST_OUTPUT_BUCKET && RUN_ID 
+    && AWS_REGION && AWS_ACCESS_KEY && AWS_ACCESS_SECRET 
     && DB_URI && DB_USER && DB_PASS, 
     "Invalid command line arguments");
 
 export const TEST_CODE = TEST_CODE_FILE.replaceAll(/(\s|\.)+/g, "-");
-export const AWS_CONFIG = { region: AWS_REGION, credentials: { accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_ACCESS_SECRET } }

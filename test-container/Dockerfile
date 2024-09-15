@@ -4,7 +4,7 @@
 #     - installs node & typescript
 #     - `npm install` dependencies (`npm ci`)
 #     - run `npm build`
-#     - run `npm test` with env variables as secrets
+#     - run `npm test`
 
 # https://docs.docker.com/reference/dockerfile/#run---mounttypesecret
 # https://docs.docker.com/build/building/secrets/

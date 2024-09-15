@@ -2,9 +2,11 @@ import { DashboardSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, SendEmailCommand, SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
 import { ObjectId } from "mongodb";
 import { composeEmailBody } from "./email";
+import { AWS_CONFIG } from "./constants";
 
+// Sends AWS boilerplate email to verify an email address for sending
 export async function sendVerificationEmail(email: string): Promise<void> {
-    const client = new SESClient();
+    const client = new SESClient(AWS_CONFIG);
     const cmd = new VerifyEmailIdentityCommand({ EmailAddress: email });
     await client.send(cmd);
 }
@@ -13,7 +15,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
 export async function sendTestCompletionEmails(
     emailList: string[], nextRunEmailList: string[], 
     runId: ObjectId, latestTestRuns: TestRunFileSchema[]): Promise<void> { 
-    const client = new SESClient();
+    const client = new SESClient(AWS_CONFIG);
 
     // Retrieve only the verified emails from the list
     const getVerifications = new GetIdentityVerificationAttributesCommand(
@@ -58,5 +60,7 @@ export async function sendTestCompletionEmails(
     }
 }
 
-// TODO: Initiate Kubernetes test run
-export async function triggerKubernetesTestRun() { }
+// TODO: Initiate ECS test run
+export async function triggerEcsTestRun() { 
+    
+}
