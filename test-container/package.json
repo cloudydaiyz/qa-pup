@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "playwright install && tsc",
-    "pretest": "npm build && node scripts/prepare-test.js",
+    "pretest": "npm run build && node scripts/prepare-test.js",
     "test": "playwright test || true",
     "posttest": "node scripts/cleanup-test.js"
   },
@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.649.0",
-    "@cloudydaiyz/qa-pup-core": "^1.2.0",
+    "@aws-sdk/client-ses": "^3.651.1",
+    "@cloudydaiyz/qa-pup-core": "^1.8.2",
     "mime-types": "^2.1.35",
     "mongodb": "^6.9.0"
   }

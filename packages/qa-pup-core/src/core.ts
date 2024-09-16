@@ -1,6 +1,6 @@
 import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
-import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, TEST_LIFETIME } from "./constants";
+import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME } from "./constants";
 import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail, cleanupEcsTestRun } from "./cloud";
 import assert from "assert";
 
@@ -14,8 +14,8 @@ export class PupCore {
     testMetadataColl: Collection<TestMetadataCollection>;
     connection: Promise<MongoClient>;
     
-    constructor(uri: string, user: string, pass: string) {
-        this.client = new MongoClient(uri, { auth: { username: user, password: pass } });
+    constructor() {
+        this.client = new MongoClient(MONGODB_URI, { auth: { username: MONGODB_USER, password: MONGODB_PASS } });
         this.testRunColl = this.client.db(DB_NAME).collection("testRun");
         this.testMetadataColl = this.client.db(DB_NAME).collection("testMetadata");
         this.connection = this.client.connect();
@@ -184,6 +184,8 @@ export class PupService extends PupCore {
     
     // Handles the cleanup of old tests and manual run refreshes
     public async testLifecycleCleanup(): Promise<void> {
+        assert(RAW_TEST_LIFETIME, "Invalid environment variable RAW_TEST_LIFETIME");
+        const TEST_LIFETIME = Number(RAW_TEST_LIFETIME);
         const operations = [];
 
         // Refresh the number of manual runs
@@ -214,6 +216,9 @@ export class PupService extends PupCore {
 
     // Adds information from one file's test run into the database
     public async addTestRunFile(file: TestRunFileSchema, metadata: TestMetadataSchema[]): Promise<void> {
+        // FUTURE: Limit the number of tests stored in the document
+        // file.tests = file.tests.slice(0, 10); 
+        
         const insertTest = await this.testRunColl.insertOne(file);
         assert(insertTest.acknowledged, "Test run file insertion failed");
 

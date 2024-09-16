@@ -4,7 +4,7 @@ import assert from "assert";
 import fs from "fs";
 import mime from "mime-types";
 
-import { AWS_REGION, TEST_CODE_BUCKET, TEST_OUTPUT_BUCKET, TEST_CODE_FILE, RUN_ID, TEST_CODE, DB_URI, DB_USER, DB_PASS } from "./constants";
+import { AWS_REGION, TEST_INPUT_BUCKET, TEST_OUTPUT_BUCKET, TEST_FILE, RUN_ID, TEST_FILE_ID } from "./constants";
 import { ObjectId } from "mongodb";
 import { PupService } from "@cloudydaiyz/qa-pup-core";
 
@@ -63,11 +63,11 @@ async function cleanup() {
     console.log('Storing test artifacts...');
     const index = fs.readFileSync('./playwright-report/index.html');
     const testResults = fs.readFileSync('./playwright-report/test-results.json');
-    const client = new S3Client({ region: AWS_REGION });
+    const client = new S3Client();
 
     const putIndex = new PutObjectCommand({
         Bucket: TEST_OUTPUT_BUCKET,
-        Key: `${RUN_ID}/${TEST_CODE}/index.html`,
+        Key: `${RUN_ID}/${TEST_FILE_ID}/index.html`,
         Body: index
     });
     const response1 = await client.send(putIndex);
@@ -75,7 +75,7 @@ async function cleanup() {
 
     const putTestResults = new PutObjectCommand({
         Bucket: TEST_OUTPUT_BUCKET,
-        Key: `${RUN_ID}/${TEST_CODE}/test-results.json`,
+        Key: `${RUN_ID}/${TEST_FILE_ID}/test-results.json`,
         Body: testResults,
     });
     const response2 = await client.send(putTestResults);
@@ -87,7 +87,7 @@ async function cleanup() {
         const data = fs.readFileSync(`./playwright-report/data/${file}`);
         const putData = new PutObjectCommand({
             Bucket: TEST_OUTPUT_BUCKET,
-            Key: `${RUN_ID}/${TEST_CODE}/data/${file}`,
+            Key: `${RUN_ID}/${TEST_FILE_ID}/data/${file}`,
             Body: data,
         });
         const response = await client.send(putData);
@@ -118,13 +118,13 @@ async function cleanup() {
             const vidData = fs.readFileSync(vidLocalPath);
             const putVid = new PutObjectCommand({
                 Bucket: TEST_OUTPUT_BUCKET,
-                Key: `${RUN_ID}/${TEST_CODE}/${vidFileName}`,
+                Key: `${RUN_ID}/${TEST_FILE_ID}/${vidFileName}`,
                 ContentType: attachment.contentType,
                 Body: vidData,
             });
             console.log(attachment.contentType);
 
-            const testVidObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/${vidFileName}`;
+            const testVidObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_FILE_ID}/${vidFileName}`;
             const putVidOp = client.send(putVid)
                 .then(response => {
                     assert(response.ETag, "Invalid response");
@@ -166,11 +166,11 @@ async function cleanup() {
     // Store corresponding test data in MongoDB
     console.log("Sending test results to database...");
     
-    const indexUrl = `http://${TEST_OUTPUT_BUCKET}.s3-website.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/index.html`;
-    const testResultsObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_CODE}/test-results.json`;
+    const indexUrl = `http://${TEST_OUTPUT_BUCKET}.s3-website.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_FILE_ID}/index.html`;
+    const testResultsObjUrl = `https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${RUN_ID}/${TEST_FILE_ID}/test-results.json`;
     const testRunFile: TestRunFileSchema = {
         docType: "TEST_RUN_FILE",
-        name: TEST_CODE,
+        name: TEST_FILE_ID,
         duration: duration,
         status: status,
         runId: new ObjectId(RUN_ID),
@@ -178,14 +178,15 @@ async function cleanup() {
         testsRan: testsRan,
         testsPassed: testsPassed,
         tests: testMetadata,
-        sourceObjectUrl: `https://${TEST_CODE_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${TEST_CODE_FILE}`,
+        sourceObjectUrl: `https://${TEST_INPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${TEST_FILE}`,
         reporters: {
             htmlStaticUrl: indexUrl,
             jsonObjectUrl: testResultsObjUrl
         }
     };
-    const service = new PupService(DB_URI!, DB_USER!, DB_PASS!);
+    const service = new PupService();
     await service.addTestRunFile(testRunFile, testMetadata);
+    service.client.close();
 
     console.log('Cleanup complete!');
 }
