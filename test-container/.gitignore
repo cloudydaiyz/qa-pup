@@ -8,3 +8,4 @@ tests
 cleanup-test.js
 constants.js
 prepare-test.js
+generate-run.js

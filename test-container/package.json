@@ -13,7 +13,8 @@
     "@cloudydaiyz/qa-pup-types": "^2.1.0",
     "@playwright/test": "^1.47.0",
     "@types/mime-types": "^2.1.4",
-    "@types/node": "^22.5.4"
+    "@types/node": "^22.5.4",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.649.0",

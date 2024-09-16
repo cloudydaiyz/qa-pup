@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Checks if the necessary environment variables are set
 
 DIR=`dirname $0`
@@ -13,14 +13,22 @@ if [ -f "${DIR}/secrets.sh" ]; then
     export RUN_ID=`node "${DIR}/generate-run.js"`
 fi
 
-VARS=("TEST_INPUT_BUCKET" "TEST_FILE" "TEST_OUTPUT_BUCKET" "RUN_ID" \
-    "AWS_REGION" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" \
-    "MONGODB_URI" "MONGODB_USER" "MONGODB_PASS")
+# VARS=("TEST_INPUT_BUCKET" "TEST_FILE" "TEST_OUTPUT_BUCKET" "RUN_ID" \
+#     "AWS_REGION" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" \
+#     "MONGODB_URI" "MONGODB_USER" "MONGODB_PASS")
 
-echo Vars: "${VARS[@]}"
-for i in "${VARS[@]}"; do
+VARS="TEST_INPUT_BUCKET TEST_FILE TEST_OUTPUT_BUCKET RUN_ID \
+      AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY \
+      MONGODB_URI MONGODB_USER MONGODB_PASS"
+
+# Removed since this only works in `sh` and not `bash`:
+# echo Vars: "${VARS[@]}"
+# for i in "${VARS[@]}"; do
+
+echo Vars: $VARS
+for i in $VARS; do
     eval value=\$$i
-    # echo $i: $value
+    echo $i: $value
 
     if [ -z $value ]; then
         echo "Environment variable $i is not set"

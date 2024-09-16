@@ -6,10 +6,25 @@
 #     - run `npm build`
 #     - run `npm test`
 
-# Might not need this anymore based on ECS secret passing
-# https://docs.docker.com/reference/dockerfile/#run---mounttypesecret
-# https://docs.docker.com/build/building/secrets/
-# https://docs.docker.com/reference/cli/docker/buildx/build/#secret
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package-lock.json ./
+COPY package.json ./
+COPY playwright.config.ts ./
+COPY tsconfig.json ./
+COPY src/ ./src/
+COPY scripts/check_env.sh ./scripts/check_env.sh
+COPY scripts/entrypoint.sh ./scripts/entrypoint.sh
+
+RUN apk add --no-cache bash
+RUN npm ci
+RUN npm run build
+
+RUN chmod +x ./scripts/entrypoint.sh
+
+CMD ["./scripts/entrypoint.sh"]
 
 # `npm install --save-dev @playwright/test` - installs Playwright Test
 # `npm install --save-dev @types/node` - installs types
