@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Checks if the necessary environment variables are set
 
 DIR=`dirname $0`
