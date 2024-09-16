@@ -5,3 +5,9 @@
 `source scripts/run_container.sh` - runs the container created by `scripts/build_container.sh`
 
 `scripts/start.sh` - builds and runs the container
+
+## Notes 
+
+https://docs.docker.com/get-started/workshop/04_sharing_app/ 
+
+https://docs.docker.com/reference/cli/docker/image/push/ 
