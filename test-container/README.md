@@ -1,4 +1,8 @@
-# test-container
+# qa-pup-test-container
+
+Container to run Playwright tests on. [View on Docker Hub](https://hub.docker.com/r/cloudydaiyz/qa-pup-test-container).
+
+## Commands
 
 `source scripts/build_container.sh` - build the container and updates environment variables if you have a `secrets.sh` file declared in the `scripts` folder (look at `secrets.temp.sh` for reference)
 

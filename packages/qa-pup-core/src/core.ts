@@ -1,7 +1,7 @@
 import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME } from "./constants";
-import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail, cleanupEcsTestRun } from "./cloud";
+import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
 import assert from "assert";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
@@ -177,9 +177,6 @@ export class PupService extends PupCore {
                 latestTestRuns, 
             );
         }
-
-        // Cleanup leftover artifacts from setting up the ECS test run
-        await cleanupEcsTestRun();
     }
     
     // Handles the cleanup of old tests and manual run refreshes

@@ -2,6 +2,10 @@ import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, SendEmailCommand, SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
 import { ObjectId } from "mongodb";
 import { composeEmailBody } from "./email";
+import { ECSClient, ListTasksCommand, DescribeTasksCommand, DesiredStatus, Task } from "@aws-sdk/client-ecs";
+import { EventBridgeHandler } from "aws-lambda";
+import assert from "assert";
+import { ECS_CLUSTER_NAME } from "./constants";
 
 // Sends AWS boilerplate email to verify an email address for sending
 export async function sendVerificationEmail(email: string): Promise<void> {
@@ -61,25 +65,48 @@ export async function sendTestCompletionEmails(
 
 // Initiates ECS task for the test run
 export async function triggerEcsTestRun() { 
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/RegisterTaskDefinitionCommand/
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/eventbridge/command/PutRuleCommand/
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/StartTaskCommand/
         // override environment variables TEST_CODE_BUCKET, TEST_CODE_FILE, TEST_OUTPUT_BUCKET, and RUN_ID
 }
 
-// true if all tasks have completed, false otherwise
-export async function isEcsTestRunComplete(): Promise<boolean> {
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/ListTasksCommand/
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/DescribeTasksCommand/
-    return true;
-}
+// True if all tasks have completed, false otherwise
+export async function isEcsTestRunComplete(runId: string): Promise<boolean> {
+    assert(ECS_CLUSTER_NAME, "ECS cluster name not set");
+    const client = new ECSClient();
+    const cluster = ECS_CLUSTER_NAME;
+    
+    let tasks = [] as string[];
+    for (const desiredStatus of ["RUNNING", "PENDING", "STOPPED"] as DesiredStatus[]) {
+        const listTasksCommand = new ListTasksCommand({ cluster, desiredStatus });
+        const listTasksResult = await client.send(listTasksCommand);
+        // console.log(JSON.stringify(listTasksResult, null, 2));
 
-// Cleans up all cloud resources associated with a test run
-export async function cleanupEcsTestRun() {
-    // Deregister and delete ECS task definition associated with a test run
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/DeregisterTaskDefinitionCommand/
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/DeleteTaskDefinitionsCommand/
+        tasks = tasks.concat(listTasksResult.taskArns!);
+    }
+    // console.log("Tasks:");
+    // console.log(JSON.stringify(tasks, null, 2));
+    
+    const describeTasksCommand = new DescribeTasksCommand({ cluster, tasks });
+    const taskInfo = await client.send(describeTasksCommand);
+    // console.log(JSON.stringify(taskInfo, null, 2));
+    
+    // console.log("Task Info:");
+    // console.log(JSON.stringify(taskInfo.tasks, null, 2));
+    
+    const filteredTasks = taskInfo.tasks!.filter(t => {
+        return t.overrides!.containerOverrides!.find(o => {
+            return o.environment!.find(e => e.name == "RUN_ID" && e.value == runId);
+        });
+    });
+    assert(filteredTasks.length > 0, "No tasks found for run ID");
 
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/eventbridge/command/RemoveTargetsCommand/
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/eventbridge/command/DeleteRuleCommand/
+    // console.log("Filtered Task Info:");
+    // console.log(JSON.stringify(filteredTasks, null, 2));
+    
+    filteredTasks.forEach((t, i) => {
+        console.log(tasks[i], t.containers![0].lastStatus);
+    });
+
+    // Use lastStatus to determine if the task has completed for each container  
+    return filteredTasks.every(t => t.containers![0].lastStatus == "STOPPED");
 }

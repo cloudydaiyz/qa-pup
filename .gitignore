@@ -1,8 +1,9 @@
 node_modules
 lib
 .DS_Store
-SECRETS.MD
-ENV.MD
+SECRETS.md
+ENV.md
+TODO.md
 secrets.sh
 
 # == Terraform ==
