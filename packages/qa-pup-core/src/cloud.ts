@@ -1,11 +1,12 @@
-import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, SendEmailCommand, SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
-import { ObjectId } from "mongodb";
+import { ECSClient, ListTasksCommand, DescribeTasksCommand, DesiredStatus, Task, StartTaskCommand, RunTaskCommand } from "@aws-sdk/client-ecs";
+import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+
+import { ECS_CLUSTER_NAME, ECS_TASK_DEFINITION_NAME, TEST_INPUT_BUCKET } from "./constants";
 import { composeEmailBody } from "./email";
-import { ECSClient, ListTasksCommand, DescribeTasksCommand, DesiredStatus, Task } from "@aws-sdk/client-ecs";
-import { EventBridgeHandler } from "aws-lambda";
 import assert from "assert";
-import { ECS_CLUSTER_NAME } from "./constants";
+
 
 // Sends AWS boilerplate email to verify an email address for sending
 export async function sendVerificationEmail(email: string): Promise<void> {
@@ -17,7 +18,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
 // Send test completion email via SES
 export async function sendTestCompletionEmails(
     emailList: string[], nextRunEmailList: string[], 
-    runId: ObjectId, latestTestRuns: TestRunFileSchema[]): Promise<void> { 
+    runId: string, latestTestRuns: TestRunFileSchema[]): Promise<void> { 
     const client = new SESClient();
 
     // Retrieve only the verified emails from the list
@@ -39,11 +40,11 @@ export async function sendTestCompletionEmails(
         },
         Message: {
             Subject: {
-                Data: "QA Pup - Your test run has completed (ID: " + runId.toHexString() + ")",
+                Data: "QA Pup - Your test run has completed (ID: " + runId + ")",
             },
             Body: {
                 Html: {
-                    Data: composeEmailBody(runId.toHexString(), latestTestRuns),
+                    Data: composeEmailBody(runId, latestTestRuns),
                 }
             },
         },
@@ -64,9 +65,37 @@ export async function sendTestCompletionEmails(
 }
 
 // Initiates ECS task for the test run
-export async function triggerEcsTestRun() { 
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ecs/command/StartTaskCommand/
-        // override environment variables TEST_CODE_BUCKET, TEST_CODE_FILE, TEST_OUTPUT_BUCKET, and RUN_ID
+export async function triggerEcsTestRun(runId: string) { 
+    assert(TEST_INPUT_BUCKET, "TEST_INPUT_BUCKET not set");
+
+    // Get all the files from the input bucket
+    const s3Client = new S3Client();
+    const listObjectsCmd = new ListObjectsV2Command({
+        Bucket: TEST_INPUT_BUCKET
+    });
+    const files = (await s3Client.send(listObjectsCmd)).Contents!.map(obj => obj.Key!);
+
+    // Run a task for each file using the predefined task definition
+    const taskOperations = []
+    for(const file in files) {
+        const ecsClient = new ECSClient();
+        const startTaskCmd = new RunTaskCommand({
+            cluster: ECS_CLUSTER_NAME,
+            taskDefinition: ECS_TASK_DEFINITION_NAME,
+            overrides: {
+                containerOverrides: [
+                    {
+                        environment: [
+                            { name: "RUN_ID", value: runId },
+                            { name: "TEST_FILE", value: file },
+                        ]
+                    }
+                ]
+            }
+        });
+        taskOperations.push(ecsClient.send(startTaskCmd));
+    }
+    await Promise.all(taskOperations);
 }
 
 // True if all tasks have completed, false otherwise

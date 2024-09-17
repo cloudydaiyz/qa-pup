@@ -1,4 +1,4 @@
-import { DashboardSchema, RunState, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { DashboardSchema, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME } from "./constants";
 import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
@@ -51,16 +51,17 @@ export class PupCore {
             "Cannot trigger a test run within an hour of a scheduled run."
         );
 
-        // Init the filter to update the test run collection
+        // Initalize the filter to update the test run collection
+        const runId = new ObjectId();
         let emailList = email ? [ email ] : [];
         let updateFilter: UpdateFilter<TestRunCollection> = {
             $set: {
                 currentRun: {
                     state: "RUNNING",
-                    runType: runType,
-                    runId: new ObjectId(),
+                    runType,
+                    runId,
                     startTime: new Date(),
-                    emailList: emailList
+                    emailList
                 }
             }
         };
@@ -89,8 +90,8 @@ export class PupCore {
         const updateDashboard = await this.testRunColl.updateOne({ docType: "DASHBOARD" }, updateFilter);
         assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 && updateDashboard.modifiedCount == 1, "Dashboard update failed");
 
-        // Start the test runs in the kubernetes cluster
-        await triggerEcsTestRun();
+        // Start the test runs in ECS cluster
+        await triggerEcsTestRun(runId.toHexString());
     }
 
     // Adds an email to the list of emails to be notified for the current or next scheduled run
@@ -173,7 +174,7 @@ export class PupService extends PupCore {
             await sendTestCompletionEmails(
                 dashboard.currentRun.emailList!, 
                 dashboard.nextScheduledRun.emailList,
-                dashboard.currentRun.runId!, 
+                dashboard.currentRun.runId!.toHexString(), 
                 latestTestRuns, 
             );
         }
