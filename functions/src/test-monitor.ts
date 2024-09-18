@@ -1,10 +1,8 @@
 import { EventBridgeHandler } from "aws-lambda";
 import { Task } from "@aws-sdk/client-ecs";
-import { isEcsTestRunComplete, PupService } from "@cloudydaiyz/qa-pup-core";
+import { PupService } from "@cloudydaiyz/qa-pup-core";
+import { getTestCompletionLock, isEcsTestRunComplete, setTestCompletionLock } from "@cloudydaiyz/qa-pup-core/cloud";
 import { assert } from "console";
-
-// for handler, use EventBridgeHandler<TDetailType extends string, TDetail, TResult> from @types/aws-lambda
-    // the type is a Task https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_task_events.html
 
 const pupService = new PupService();
 
@@ -24,9 +22,15 @@ export const handler: EventBridgeHandler<"ECS Task State Change", Task, void> = 
     
     if(await isEcsTestRunComplete(runId!)) {
         console.log("Test run complete");
-        await pupService.testLifecycleCleanup();
+
+        const lock = await getTestCompletionLock();
+        if(lock == "OFF") {
+            await setTestCompletionLock("ON");
+            await pupService.connection;
+            await pupService.testLifecycleCleanup();
+            await setTestCompletionLock("OFF");
+        }
     } else {
         console.log("Test run incomplete");
     }
-
 }

@@ -10,13 +10,20 @@ type ScheduledTask = {
 export const handler = async (event: ScheduledTask) => {
     await pupService.connection;
 
-    if(event.task == "run") {
-        await pupService.triggerRun("SCHEDULED");
-    } else if(event.task == "cleanup") {
-        await pupService.testLifecycleCleanup();
-    } else {
-        assert(false, "Invalid task");
-    }
+    let body = JSON.stringify({ message: "Operation successful" });
+    try {
+        if(event.task == "run") {
+            await pupService.triggerRun("SCHEDULED");
+        } else if(event.task == "cleanup") {
+            await pupService.testLifecycleCleanup();
+        } else {
+            throw new Error("Invalid task");
+        }
+    } catch(e) {
 
+        body = JSON.stringify({ message: (e as Error).message });
+        return { statusCode: 400, body };
+    }
+    
     return { statusCode: 200 };
 }

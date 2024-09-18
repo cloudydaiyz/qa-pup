@@ -2,7 +2,6 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { PupCore } from "@cloudydaiyz/qa-pup-core";
 import { Path } from "path-parser";
 import assert from "assert";
-import { RunType } from "@cloudydaiyz/qa-pup-types";
 
 const pupCore = new PupCore();
 
