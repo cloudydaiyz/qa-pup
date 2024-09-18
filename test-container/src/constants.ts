@@ -4,7 +4,7 @@ import assert from "assert";
 export const TEST_INPUT_BUCKET = process.env.TEST_INPUT_BUCKET; // "qa-pup-example-input";
 export const TEST_FILE = process.env.TEST_FILE!; // "example.spec.ts";
 export const TEST_OUTPUT_BUCKET = process.env.TEST_OUTPUT_BUCKET; // "qa-pup-example-output";
-export const RUN_ID = process.env.RUN_ID; // "runidexample12345"; // stringified run id
+export const RUN_ID = process.env.RUN_ID!; // "runidexample12345"; // stringified run id
 export const AWS_REGION = process.env.AWS_REGION;
 
 // Also must be defined for qa-pup-core:

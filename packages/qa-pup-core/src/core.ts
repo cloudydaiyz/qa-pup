@@ -1,7 +1,6 @@
 import { DashboardSchema, LatestTestRunFile, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME } from "./constants";
-import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
 import assert from "assert";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
@@ -23,7 +22,10 @@ export class PupCore {
 
     // Obtains the current dashboard info
     public async readDashboardInfo(): Promise<DashboardSchema> {
-        const dashboard = await this.testRunColl.findOne({ docType: "DASHBOARD" }) as DashboardSchema;
+        const dashboard = await this.testRunColl.findOne(
+            { docType: "DASHBOARD" },
+            { projection: { _id: 0 } }
+        ) as DashboardSchema;
         assert(dashboard, "MongoDB improperly initialized");
         return dashboard;
     }
@@ -31,7 +33,8 @@ export class PupCore {
     // Obtains the info for a specific test run
     public async readLatestTestInfo(runId: string, name: string): Promise<TestRunFileSchema> {
         const testInfo = await this.testRunColl.findOne(
-            { docType: "TEST_RUN_FILE", runId, name }
+            { docType: "TEST_RUN_FILE", runId, name },
+            { projection: { _id: 0 } }
         ) as TestRunFileSchema;
         assert(testInfo, "No test info currently available for the specified test run");
         return testInfo;
@@ -94,7 +97,7 @@ export class PupCore {
             "Dashboard update failed");
 
         // Start the test runs in ECS cluster
-        await triggerEcsTestRun(runId);
+        await import("./cloud").then(cloud => cloud.triggerEcsTestRun(runId));
     }
 
     // Adds an email to the list of emails to be notified for the current or next scheduled run
@@ -134,20 +137,22 @@ export class PupCore {
         assert(update.acknowledged && update.modifiedCount == 1, "Unable to add email to the email list");
 
         // Sends AWS verification email
-        await sendVerificationEmail(email);
+        await import("./cloud").then(cloud => cloud.sendVerificationEmail(email));
     }
 }
 
 // Additional functionality for other backend services
 export class PupService extends PupCore {
 
-    // Handles the completion of a test run
-    public async testCompletion(): Promise<void> {
+    // Handles the completion of a test run with the specified run ID
+    public async testCompletion(runId: string): Promise<void> {
         const dashboard = await this.readDashboardInfo();
+        assert(dashboard.currentRun.state == "RUNNING", "No test run currently in progress");
+        assert(dashboard.currentRun.runId == runId, "Invalid run ID");
 
         // Obtain information from the dashboard
         const latestTestRunFiles = await this.testRunColl.find(
-            { docType: "TEST_RUN_FILE", runId: dashboard.currentRun.runId },
+            { docType: "TEST_RUN_FILE", runId },
             { 
                 projection: { _id: 0, name: 1, duration: 1, status: 1 }
             }
@@ -158,7 +163,7 @@ export class PupService extends PupCore {
             { docType: "DASHBOARD" }, 
             {
                 $set: {
-                    runId: dashboard.currentRun.runId,
+                    runId,
                     runType: dashboard.currentRun.runType,
                     startTime: dashboard.currentRun.startTime,
                     latestTests: latestTestRunFiles,
@@ -169,16 +174,16 @@ export class PupService extends PupCore {
             }, 
         );
         assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 
-            && updateDashboard.modifiedCount == 1);
+            && updateDashboard.modifiedCount == 1, "Unable to update dashboard");
         
         // Send test completion emails
         if(dashboard.currentRun.emailList!.length > 0) {
-            await sendTestCompletionEmails(
+            await import("./cloud").then(cloud => cloud.sendTestCompletionEmails(
                 dashboard.currentRun.emailList!, 
                 dashboard.nextScheduledRun.emailList,
-                dashboard.currentRun.runId!, 
+                runId, 
                 latestTestRunFiles, 
-            );
+            ));
         }
     }
     

@@ -5,7 +5,6 @@ import fs from "fs";
 import mime from "mime-types";
 
 import { AWS_REGION, TEST_INPUT_BUCKET, TEST_OUTPUT_BUCKET, TEST_FILE, RUN_ID, TEST_FILE_ID } from "./constants";
-import { ObjectId } from "mongodb";
 import { PupService } from "@cloudydaiyz/qa-pup-core";
 
 
@@ -173,7 +172,7 @@ async function cleanup() {
         name: TEST_FILE_ID,
         duration: duration,
         status: status,
-        runId: new ObjectId(RUN_ID),
+        runId: RUN_ID,
         startTime: startTime,
         testsRan: testsRan,
         testsPassed: testsPassed,

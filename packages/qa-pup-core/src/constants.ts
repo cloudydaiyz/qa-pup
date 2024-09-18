@@ -21,6 +21,7 @@ export const ECS_CLUSTER_NAME = process.env.ECS_CLUSTER_NAME;
 export const ECS_TASK_DEFINITION_NAME = process.env.ECS_TASK_DEFINITION_NAME;
 export const TEST_INPUT_BUCKET = process.env.TEST_INPUT_BUCKET;
 export const SENDER_EMAIL = process.env.SENDER_EMAIL!;
+export const TEST_COMPLETION_LOCK = process.env.TEST_COMPLETION_LOCK!;
 
 const requiredCmdLineArgs = [AWS_ACCESS_KEY, AWS_ACCESS_SECRET, AWS_REGION, MONGODB_URI, MONGODB_USER, MONGODB_PASS];
 

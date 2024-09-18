@@ -1,10 +1,10 @@
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, SendEmailCommand, SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
-import { ECSClient, ListTasksCommand, DescribeTasksCommand, DesiredStatus, Task, StartTaskCommand, RunTaskCommand } from "@aws-sdk/client-ecs";
+import { ECSClient, ListTasksCommand, DescribeTasksCommand, DesiredStatus, RunTaskCommand } from "@aws-sdk/client-ecs";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { LatestTestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { GetParameterCommand, PutParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { LatestTestRunFile } from "@cloudydaiyz/qa-pup-types";
 
-import { ECS_CLUSTER_NAME, ECS_TASK_DEFINITION_NAME, SENDER_EMAIL, TEST_INPUT_BUCKET } from "./constants";
-import { composeEmailBody } from "./email";
+import { ECS_CLUSTER_NAME, ECS_TASK_DEFINITION_NAME, SENDER_EMAIL, TEST_COMPLETION_LOCK, TEST_INPUT_BUCKET } from "./constants";
 import assert from "assert";
 
 
@@ -32,6 +32,7 @@ export async function sendTestCompletionEmails(
     );
 
     // Send the templated email
+    const htmlData = await import("./email").then(m => m.composeEmailBody(runId, latestTestRunFiles));
     const sendEmail = new SendEmailCommand({
         Source: SENDER_EMAIL,
         Destination: {
@@ -44,7 +45,7 @@ export async function sendTestCompletionEmails(
             },
             Body: {
                 Html: {
-                    Data: composeEmailBody(runId, latestTestRunFiles),
+                    Data: htmlData,
                 }
             },
         },
@@ -141,4 +142,20 @@ export async function isEcsTestRunComplete(runId: string): Promise<boolean> {
 
     // Use lastStatus to determine if the task has completed for each container  
     return filteredTasks.every(t => t.containers![0].lastStatus == "STOPPED");
+}
+
+type TestCompletionLock = "ON" | "OFF";
+export async function getTestCompletionLock(): Promise<TestCompletionLock> {
+    const client = new SSMClient();
+    const cmd = new GetParameterCommand({ Name: TEST_COMPLETION_LOCK });
+    const res = await client.send(cmd);
+    return res.Parameter!.Value as TestCompletionLock;
+}
+
+export async function setTestCompletionLock(value: TestCompletionLock): Promise<void> {
+    const client = new SSMClient();
+    const cmd = new PutParameterCommand(
+        { Name: TEST_COMPLETION_LOCK, Value: value, Type: "String", Overwrite: true }
+    );
+    await client.send(cmd);
 }

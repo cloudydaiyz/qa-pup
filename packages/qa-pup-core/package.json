@@ -5,15 +5,22 @@
   "keywords": [
     "qa-pup"
   ],
-  "version": "2.0.0",
+  "version": "2.1.1",
   "license": "ISC",
-  "main": "lib/core.js",
-  "types": "lib/core.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/core.d.ts",
+      "default": "./lib/core.js"
+    },
+    "./cloud": {
+      "types": "./lib/cloud.d.ts",
+      "default": "./lib/cloud.js"
+    }
+  },
   "scripts": {
     "prepare": "tsc"
   },
   "dependencies": {
-    "mjml": "^4.15.3",
     "mongodb": "^6.8.1"
   },
   "devDependencies": {
@@ -21,10 +28,12 @@
     "@aws-sdk/client-eventbridge": "^3.651.1",
     "@aws-sdk/client-s3": "^3.649.0",
     "@aws-sdk/client-ses": "^3.650.0",
+    "@aws-sdk/client-ssm": "^3.653.0",
     "@cloudydaiyz/qa-pup-types": "^3.0.0",
     "@types/aws-lambda": "^8.10.145",
     "@types/mjml": "^4.7.4",
-    "@types/node": "^22.5.4"
+    "@types/node": "^22.5.4",
+    "mjml": "^4.15.3"
   },
   "files": [
     "lib",

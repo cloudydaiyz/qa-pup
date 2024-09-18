@@ -1,4 +1,4 @@
-import { LatestTestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { LatestTestRunFile } from "@cloudydaiyz/qa-pup-types";
 import mjml from "mjml";
 
 const testCompletionEmailTemplate = `
