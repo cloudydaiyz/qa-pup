@@ -1,4 +1,4 @@
-import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { LatestTestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import mjml from "mjml";
 
 const testCompletionEmailTemplate = `
@@ -54,7 +54,7 @@ const testRunBlockTemplate = `
 
 `;
 
-export function composeEmailBody(runId: string, testRuns: TestRunFileSchema[]): string {
+export function composeEmailBody(runId: string, testRuns: LatestTestRunFile[]): string {
     let testRunBlocks = "";
     for(const testRun of testRuns) {
         testRunBlocks += testRunBlockTemplate

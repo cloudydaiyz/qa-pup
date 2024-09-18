@@ -1,9 +1,9 @@
 import { DeleteIdentityCommand, GetIdentityVerificationAttributesCommand, SendEmailCommand, SESClient, VerifyEmailIdentityCommand } from "@aws-sdk/client-ses";
 import { ECSClient, ListTasksCommand, DescribeTasksCommand, DesiredStatus, Task, StartTaskCommand, RunTaskCommand } from "@aws-sdk/client-ecs";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { LatestTestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 
-import { ECS_CLUSTER_NAME, ECS_TASK_DEFINITION_NAME, TEST_INPUT_BUCKET } from "./constants";
+import { ECS_CLUSTER_NAME, ECS_TASK_DEFINITION_NAME, SENDER_EMAIL, TEST_INPUT_BUCKET } from "./constants";
 import { composeEmailBody } from "./email";
 import assert from "assert";
 
@@ -18,7 +18,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
 // Send test completion email via SES
 export async function sendTestCompletionEmails(
     emailList: string[], nextRunEmailList: string[], 
-    runId: string, latestTestRuns: TestRunFileSchema[]): Promise<void> { 
+    runId: string, latestTestRunFiles: LatestTestRunFile[]): Promise<void> { 
     const client = new SESClient();
 
     // Retrieve only the verified emails from the list
@@ -33,9 +33,9 @@ export async function sendTestCompletionEmails(
 
     // Send the templated email
     const sendEmail = new SendEmailCommand({
-        Source: "kyland03.biz@gmail.com",
+        Source: SENDER_EMAIL,
         Destination: {
-            ToAddresses: ["kyland03.biz@gmail.com"],
+            ToAddresses: [ SENDER_EMAIL ],
             BccAddresses: emailList,
         },
         Message: {
@@ -44,24 +44,27 @@ export async function sendTestCompletionEmails(
             },
             Body: {
                 Html: {
-                    Data: composeEmailBody(runId, latestTestRuns),
+                    Data: composeEmailBody(runId, latestTestRunFiles),
                 }
             },
         },
     });
     await client.send(sendEmail);
 
-    // Remove the emails from the list whether they've been verified or not if they're not
-    // in the email list for the next scheduled run
+    // Remove emails from SES identities if they're not in the email list for the
+    // next scheduled run
     const emailsToRemove = emailList
         .filter(email => 
             !nextRunEmailList.includes(email) 
             && email in getVerificationsRes.VerificationAttributes!
         );
+    
+    const removeEmailOps = [];
     for(const email of emailsToRemove) {
         const deleteEmail = new DeleteIdentityCommand({ Identity: email });
-        await client.send(deleteEmail);
+        removeEmailOps.push(client.send(deleteEmail));
     }
+    await Promise.all(removeEmailOps);
 }
 
 // Initiates ECS task for the test run
@@ -76,7 +79,7 @@ export async function triggerEcsTestRun(runId: string) {
     const files = (await s3Client.send(listObjectsCmd)).Contents!.map(obj => obj.Key!);
 
     // Run a task for each file using the predefined task definition
-    const taskOperations = []
+    const taskOperations = [];
     for(const file in files) {
         const ecsClient = new ECSClient();
         const startTaskCmd = new RunTaskCommand({

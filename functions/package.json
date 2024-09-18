@@ -1,9 +1,11 @@
 {
   "name": "@cloudydaiyz/qa-pup-aws-lambda",
   "author": "Kylan Duncan",
+  "type": "module",
   "license": "ISC",
   "version": "1.0.0",
   "scripts": {
+    "build": "tsc && node scripts/rename-js-to-mjs.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

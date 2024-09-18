@@ -185,7 +185,7 @@ async function cleanup() {
         }
     };
     const service = new PupService();
-    await service.addTestRunFile(testRunFile, testMetadata);
+    await service.addTestRunFile(testRunFile);
     service.client.close();
 
     console.log('Cleanup complete!');

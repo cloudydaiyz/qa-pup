@@ -1,5 +1,3 @@
-import { ObjectId } from "mongodb";
-
 export type RunType = "MANUAL" | "SCHEDULED";
 export type RunStatus = "PASSED" | "FAILED" | "ERROR";
 export type RunStatusLower = "passed" | "failed" | "error";
@@ -12,7 +10,7 @@ export interface DashboardSchema {
 	docType: "DASHBOARD",
 
 	// Overall information for the latest test run
-	runId: ObjectId,
+	runId: string, // stringified ObjectId
 	runType: RunType,
 	startTime: Date,
 
@@ -37,7 +35,7 @@ export interface DashboardSchema {
 	currentRun: {
 		state: RunState,
 		runType?: RunType,
-		runId?: ObjectId,
+		runId?: string, // stringified ObjectId
 		startTime?: Date, 
 		emailList?: string[]
 	}
@@ -62,13 +60,13 @@ export interface TestRunFileSchema {
     status: RunStatus // computed, based on status of all tests 
 
 	// Test information
-	runId: ObjectId,
+	runId: string, // stringified ObjectId
 	startTime: Date, // computed, earliest start time of all tests
 	testsRan: number, // computed
 	testsPassed: number, // computed
 
-	// Subset pattern; store only 10 tests max and implement pagination to
-	// retrieve more (others will be in separate collection)
+	// Additional information about each test in the file
+	// NOTE: May need to turn into subset if # of test files increase enough in future
 	tests: TestMetadataSchema[],
 	
 	sourceObjectUrl: string, // s3 object url to source code
@@ -79,12 +77,13 @@ export interface TestRunFileSchema {
 }
 
 // === Test Metadata Document Schema ===
+
 // Currently embedded in TestRunFileSchema, but could turn into a standalone
 // document in the future as the # of tests increase
 
 // Data from a single test in the file
 export interface TestMetadataSchema {
-	testRunFileId?: ObjectId,
+	testRunFileId?: string, // stringified ObjectId
     suiteName?: string,
     testName: string,
     startTime: Date,

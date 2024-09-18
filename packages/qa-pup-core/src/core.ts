@@ -1,4 +1,4 @@
-import { DashboardSchema, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { DashboardSchema, LatestTestRunFile, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME } from "./constants";
 import { triggerEcsTestRun, sendTestCompletionEmails as sendTestCompletionEmails, sendVerificationEmail } from "./cloud";
@@ -29,7 +29,7 @@ export class PupCore {
     }
     
     // Obtains the info for a specific test run
-    public async readLatestTestInfo(runId: ObjectId, name: string): Promise<TestRunFileSchema> {
+    public async readLatestTestInfo(runId: string, name: string): Promise<TestRunFileSchema> {
         const testInfo = await this.testRunColl.findOne(
             { docType: "TEST_RUN_FILE", runId, name }
         ) as TestRunFileSchema;
@@ -52,7 +52,7 @@ export class PupCore {
         );
 
         // Initalize the filter to update the test run collection
-        const runId = new ObjectId();
+        const runId = new ObjectId().toHexString();
         let emailList = email ? [ email ] : [];
         let updateFilter: UpdateFilter<TestRunCollection> = {
             $set: {
@@ -68,7 +68,9 @@ export class PupCore {
 
         // Update the filter based on the run type
         if(runType == "SCHEDULED") {
-            
+            assert(Date.now() > dashboard.nextScheduledRun.startTime.getTime(), 
+                "Scheduled run not ready to be triggered");
+
             // Update the stats of the next scheduled run
             const scheduleList = dashboard.nextScheduledRun.emailList;
             updateFilter.$set = {
@@ -88,15 +90,16 @@ export class PupCore {
 
         // Update the test run collection with the new run info
         const updateDashboard = await this.testRunColl.updateOne({ docType: "DASHBOARD" }, updateFilter);
-        assert(updateDashboard.acknowledged && updateDashboard.matchedCount == 1 && updateDashboard.modifiedCount == 1, "Dashboard update failed");
+        assert(updateDashboard.acknowledged && updateDashboard.modifiedCount == 1, 
+            "Dashboard update failed");
 
         // Start the test runs in ECS cluster
-        await triggerEcsTestRun(runId.toHexString());
+        await triggerEcsTestRun(runId);
     }
 
     // Adds an email to the list of emails to be notified for the current or next scheduled run
     // Returns true if the email was successfully added, false otherwise
-    public async addToEmailList(email: string, current?: boolean): Promise<boolean> {
+    public async addToEmailList(email: string, current?: boolean): Promise<void> {
         let update: UpdateResult;
         if(current) {
 
@@ -128,11 +131,10 @@ export class PupCore {
                 { $addToSet: { "nextScheduledRun.emailList": email } }
             );
         }
-        assert(update.acknowledged);
+        assert(update.acknowledged && update.modifiedCount == 1, "Unable to add email to the email list");
 
-        const addSuccess = update.modifiedCount == 1;
-        if(addSuccess) await sendVerificationEmail(email);
-        return addSuccess;
+        // Sends AWS verification email
+        await sendVerificationEmail(email);
     }
 }
 
@@ -144,12 +146,12 @@ export class PupService extends PupCore {
         const dashboard = await this.readDashboardInfo();
 
         // Obtain information from the dashboard
-        const latestTestRuns = await this.testRunColl.find(
+        const latestTestRunFiles = await this.testRunColl.find(
             { docType: "TEST_RUN_FILE", runId: dashboard.currentRun.runId },
             { 
                 projection: { _id: 0, name: 1, duration: 1, status: 1 }
             }
-        ).toArray() as TestRunFileSchema[];
+        ).toArray() as LatestTestRunFile[];
 
         // Set the latest test run info in the dashboard
         const updateDashboard = await this.testRunColl.updateOne(
@@ -159,7 +161,7 @@ export class PupService extends PupCore {
                     runId: dashboard.currentRun.runId,
                     runType: dashboard.currentRun.runType,
                     startTime: dashboard.currentRun.startTime,
-                    latestTests: latestTestRuns,
+                    latestTests: latestTestRunFiles,
                     currentRun: {
                         state: "AT REST"
                     }
@@ -174,8 +176,8 @@ export class PupService extends PupCore {
             await sendTestCompletionEmails(
                 dashboard.currentRun.emailList!, 
                 dashboard.nextScheduledRun.emailList,
-                dashboard.currentRun.runId!.toHexString(), 
-                latestTestRuns, 
+                dashboard.currentRun.runId!, 
+                latestTestRunFiles, 
             );
         }
     }
@@ -200,12 +202,13 @@ export class PupService extends PupCore {
             docType: "TEST_RUN_FILE", 
             startTime: { $lt: new Date(Date.now() - TEST_LIFETIME) } 
         }).toArray().then(docs => docs.map(test => test._id));
+        const oldTestStringIds = oldTestIds.map(id => id.toHexString());
 
         operations.push(this.testRunColl.deleteMany(
             { _id: { $in: oldTestIds } }
         ));
         operations.push(this.testMetadataColl.deleteMany(
-            { testRunFileId: { $in: oldTestIds } }
+            { testRunFileId: { $in: oldTestStringIds } }
         ));
 
         // Wait for all the cleanup operations to finish
@@ -213,12 +216,18 @@ export class PupService extends PupCore {
     }
 
     // Adds information from one file's test run into the database
-    public async addTestRunFile(file: TestRunFileSchema, metadata: TestMetadataSchema[]): Promise<void> {
+    public async addTestRunFile(file: TestRunFileSchema): Promise<void> {
+        const tests = file.tests;
+
         // FUTURE: Limit the number of tests stored in the document
         // file.tests = file.tests.slice(0, 10); 
         
+        // Insert the test run file and its metadata
         const insertTest = await this.testRunColl.insertOne(file);
         assert(insertTest.acknowledged, "Test run file insertion failed");
+
+        let metadata = tests;
+        metadata.forEach(test => test.testRunFileId = insertTest.insertedId.toHexString());
 
         const insertMetadata = await this.testMetadataColl.insertMany(metadata);
         assert(insertMetadata.acknowledged, "Test metadata insertion failed");
