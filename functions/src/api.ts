@@ -1,14 +1,8 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { PupCore } from "@cloudydaiyz/qa-pup-core";
-import { Path } from "path-parser";
 import assert from "assert";
 
 const pupCore = new PupCore();
-
-const dashboardPath = new Path("/:stage/dashboard");
-const latestTestPath = new Path("/:stage/latest-test/:runId/:name");
-const manualRunPath = new Path("/:stage/manual-run");
-const addEmailPath = new Path("/:stage/add-email");
 
 // == Request Bodies ==
 
@@ -21,33 +15,33 @@ type AddEmailBody = {
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
     await pupCore.connection;
-    const path = event.requestContext.path;
+    const path = event.requestContext.resourcePath;
     const method = event.requestContext.httpMethod;
 
     let body = JSON.stringify({ message: "Operation successful" });
     try {
-        const parsedDashboardPath = dashboardPath.test(path);
-        const parsedLatestTestPath = latestTestPath.test(path);
-        const parsedManualRunPath = manualRunPath.test(path);
-        const parsedAddEmailPath = addEmailPath.test(path);
+        const dashboardPath = path == "/dashboard";
+        const latestTestPath = path == "/latest-test/{runId}/{name}";
+        const manualRunPath = path == "/manual-run";
+        const addEmailPath = path == "/add-email";
 
-        if(parsedDashboardPath && method == "GET") {
+        if(dashboardPath && method == "GET") {
 
             const dashboard = await pupCore.readDashboardInfo();
             body = JSON.stringify(dashboard);
-        } else if(parsedLatestTestPath && method == "GET") {
+        } else if(latestTestPath && method == "GET") {
 
             const testInfo = await pupCore.readLatestTestInfo(
-                parsedLatestTestPath.runId as string, 
-                parsedLatestTestPath.name
+                event.pathParameters!.runId as string, 
+                event.pathParameters!.name as string
             );
             body = JSON.stringify(testInfo);
-        } else if(parsedManualRunPath && method == "POST") {
+        } else if(manualRunPath && method == "POST") {
 
             let email = undefined;
             if(event.body) email = JSON.parse(event.body).email;
             await pupCore.triggerRun("MANUAL", email);
-        } else if(parsedAddEmailPath && method == "POST") {
+        } else if(addEmailPath && method == "POST") {
             assert(event.body, "Invalid event body");
             const body = JSON.parse(event.body) as AddEmailBody;
 

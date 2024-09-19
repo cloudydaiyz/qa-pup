@@ -10,8 +10,7 @@
   "dependencies": {
     "@cloudydaiyz/qa-pup-core": "^2.1.1",
     "mjml": "^4.15.3",
-    "mongodb": "^6.8.1",
-    "path-parser": "^6.1.0"
+    "mongodb": "^6.8.1"
   },
   "devDependencies": {
     "@aws-sdk/client-ecs": "^3.653.0",
