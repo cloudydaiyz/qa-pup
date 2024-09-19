@@ -1,3 +1,3 @@
-# qa-pup Architecture
+# Cloud Architecture
 
 ![img](../assets/diagram.svg)

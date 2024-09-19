@@ -1,3 +1,13 @@
+variable "aws_access_key" {
+  type        = string
+  description = "AWS access key"
+}
+
+variable "aws_secret_access_key" {
+  type        = string
+  description = "AWS secret access key"
+}
+
 variable "aws_region" {
   type        = string
   description = "AWS region to deploy resources in."
@@ -21,5 +31,4 @@ variable "sender_email" {
 variable "container_image" {
   type        = string
   description = "Docker container image to deploy."
-  default = "cloudydaiyz/qa-pup-test-container:1.0.0"
 }

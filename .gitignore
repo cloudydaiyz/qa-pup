@@ -6,6 +6,7 @@ ENV.md
 TODO.md
 secrets.sh
 controllers
+artifacts
 
 # == Terraform ==
 

@@ -14,3 +14,10 @@ terraform {
     }
   }
 }
+
+locals {
+  test_input_bucket = "qa-pup-input"
+  test_output_bucket = "qa-pup-output"
+  ecs_cluster_name = "qa-pup-cluster"
+  ecs_task_definition_name = "qa-pup-test"
+}
