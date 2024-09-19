@@ -28,7 +28,8 @@ variable "sender_email" {
   description = "Email to send test completion emails from. Must be verified in SES."
 }
 
-variable "container_image" {
-  type        = string
-  description = "Docker container image to deploy."
+variable "test_lifetime" {
+  type        = number
+  description = "Lifetime of test data in days."
+  default = 7
 }
