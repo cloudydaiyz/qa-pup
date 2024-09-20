@@ -17,21 +17,24 @@ export const handler = async () => {
         await pupCore.testRunColl.updateOne(
             { docType: "DASHBOARD" },
             {
-                runId: "N/A",
-                runType: "MANUAL",
-                startTime: new Date(),
-                latestTests: [],
-                manualRun: {
-                    remaining: 3,
-                    max: 3,
-                    nextRefresh: new Date(Date.now() + + 1000 * 60 * 60 * 24),
-                },
-                nextScheduledRun: {
+                $set: {
+                    runId: "N/A",
+                    runType: "MANUAL",
                     startTime: new Date(),
-                    emailList: []
-                },
-                currentRun: {
-                    state: "AT REST"
+                    latestTests: [],
+                    manualRun: {
+                        remaining: 3,
+                        max: 3,
+                        nextRefresh: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                    },
+                    nextScheduledRun: {
+                        startTime: new Date(),
+                        emailList: []
+                    },
+                    currentRun: {
+                        state: "AT REST",
+                        emailList: []
+                    }
                 }
             },
             { upsert: true }
@@ -42,7 +45,7 @@ export const handler = async () => {
     } catch(e) {
         
         console.log("System improperly configured");
-        return { statusCode: 200, body: JSON.stringify((e as Error).message) };
+        return { statusCode: 400, body: JSON.stringify((e as Error).message) };
     }
     
     return { statusCode: 200 };

@@ -10,8 +10,8 @@ Container to run Playwright tests on. This container is based on Ubuntu 24.04, w
 
 - `npm test` - Runs the container code locally with predefined environment variables (without building/running the container)
 
-- `source scripts/build_container.sh` - build the container and updates environment variables if you have a `secrets.sh` file declared in the `scripts` folder (look at `secrets.temp.sh` for reference)
+- `source scripts/build-container.sh` - build the container and updates environment variables if you have a `secrets.sh` file declared in the `scripts` folder (look at `secrets.temp.sh` for reference)
 
-- `source scripts/run_container.sh` - runs the container created by `scripts/build_container.sh`
+- `source scripts/run-container.sh` - runs the container created by `scripts/build-container.sh`
 
 - `scripts/start.sh` - builds and runs the container

@@ -19,6 +19,7 @@ resource "aws_lambda_layer_version" "lambda_layer" {
   layer_name = "qa-pup-functions"
 
   compatible_runtimes = ["nodejs20.x"]
+  source_code_hash = data.archive_file.layer.output_base64sha256
 }
 
 # Assume role policy for the IAM role of any lambda
@@ -109,6 +110,7 @@ resource "aws_lambda_function" "api" {
   handler          = "api.handler"
   source_code_hash = data.archive_file.function["api"].output_base64sha256
   layers = [ aws_lambda_layer_version.lambda_layer.arn ]
+  timeout = 20
 
   runtime = "nodejs20.x"
 
@@ -167,9 +169,7 @@ data "aws_iam_policy_document" "scheduled_tasks" {
     actions = [
       "ecs:RunTask"
     ]
-    resources = [ 
-      "arn:aws:ecs:${var.aws_region}:${local.account_id}:test-definition/${local.ecs_task_definition}:*"
-    ]
+    resources = [ aws_ecs_task_definition.test_task_definition.arn ]
   }
 }
 
@@ -192,6 +192,7 @@ resource "aws_lambda_function" "scheduled_tasks" {
   handler          = "scheduled-tasks.handler"
   source_code_hash = data.archive_file.function["scheduled-tasks"].output_base64sha256
   layers = [ aws_lambda_layer_version.lambda_layer.arn ]
+  timeout = 20
 
   runtime = "nodejs20.x"
 
@@ -289,6 +290,7 @@ resource "aws_lambda_function" "test_monitor" {
   handler          = "test-monitor.handler"
   source_code_hash = data.archive_file.function["test-monitor"].output_base64sha256
   layers = [ aws_lambda_layer_version.lambda_layer.arn ]
+  timeout = 20
 
   runtime = "nodejs20.x"
 
@@ -326,6 +328,13 @@ data "aws_iam_policy_document" "initialize" {
       "arn:aws:logs:${var.aws_region}:${local.account_id}:log-group:/aws/lambda/qa-pup-initialize:*"
     ]
   }
+
+  statement {
+    actions = [
+      "ses:VerifyEmailIdentity"
+    ]
+    resources = [ "*" ]
+  }
 }
 
 resource "aws_iam_role" "initialize" {
@@ -343,15 +352,18 @@ resource "aws_lambda_function" "initialize" {
   function_name    = "qa-pup-initialize"
   filename         = data.archive_file.function["initialize"].output_path
   description      = "Initialization for QA Pup project"
-  role             = aws_iam_role.test_monitor.arn
+  role             = aws_iam_role.initialize.arn
   handler          = "initialize.handler"
   source_code_hash = data.archive_file.function["initialize"].output_base64sha256
   layers = [ aws_lambda_layer_version.lambda_layer.arn ]
+  timeout = 20
 
   runtime = "nodejs20.x"
 
   environment {
-    variables = local.functions_base_env
+    variables = merge(local.functions_base_env, {
+      SENDER_EMAIL = var.sender_email
+    })
   }
 
   tags = {

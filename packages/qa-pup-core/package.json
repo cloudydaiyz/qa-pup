@@ -5,7 +5,7 @@
   "keywords": [
     "qa-pup"
   ],
-  "version": "2.1.1",
+  "version": "2.1.12",
   "license": "ISC",
   "exports": {
     ".": {
@@ -29,7 +29,7 @@
     "@aws-sdk/client-s3": "^3.649.0",
     "@aws-sdk/client-ses": "^3.650.0",
     "@aws-sdk/client-ssm": "^3.653.0",
-    "@cloudydaiyz/qa-pup-types": "^3.0.0",
+    "@cloudydaiyz/qa-pup-types": "^3.0.1",
     "@types/aws-lambda": "^8.10.145",
     "@types/mjml": "^4.7.4",
     "@types/node": "^22.5.4",

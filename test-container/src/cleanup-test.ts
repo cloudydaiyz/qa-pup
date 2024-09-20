@@ -14,7 +14,7 @@ export interface TestResultsJson {
     suites: { // usually only one member
         title: string; // file name
         specs: TestSpecs[]; // top level tests
-        suites: { // multiple test suites
+        suites?: { // multiple test suites
             title: string, // suite name
             specs: TestSpecs[] // tests for a specific test suite
         }[];
@@ -153,9 +153,11 @@ async function cleanup() {
     // Update the test data of tests in suites and outside of suites
     console.log("Updating test data...");
     for(const spec of testData.suites[0].specs) await updateTestData(spec);
-    for(const suite of testData.suites[0].suites) {
-        for(const spec of suite.specs) {
-            await updateTestData(spec, suite.title.replaceAll(/(\s|\.)+/g, "-"));
+    if(testData.suites[0].suites) {
+        for(const suite of testData.suites[0].suites) {
+            for(const spec of suite.specs) {
+                await updateTestData(spec, suite.title.replaceAll(/(\s|\.)+/g, "-"));
+            }
         }
     }
 

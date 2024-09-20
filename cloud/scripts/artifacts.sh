@@ -17,8 +17,8 @@ npm run build
 cp -r controllers "$ARTIFACTS_DIR"
 
 cd $CLOUD_DIR
-terraform plan -var-file=variables.tfvars
 
+# Essential tf commands
 # terraform validate
 # terraform plan -var-file=variables.tfvars
 # terraform apply -var-file=variables.tfvars --auto-approve

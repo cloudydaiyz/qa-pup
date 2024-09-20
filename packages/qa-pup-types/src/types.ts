@@ -34,10 +34,10 @@ export interface DashboardSchema {
     // Information about the current run
 	currentRun: {
 		state: RunState,
+		emailList: string[]
 		runType?: RunType,
 		runId?: string, // stringified ObjectId
 		startTime?: Date, 
-		emailList?: string[]
 	}
 }
 

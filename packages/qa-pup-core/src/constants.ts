@@ -16,7 +16,7 @@ export const MONGODB_URI = process.env.MONGODB_URI!;
 export const MONGODB_USER = process.env.MONGODB_USER!;
 export const MONGODB_PASS = process.env.MONGODB_PASS!;
 
-export const RAW_TEST_LIFETIME = process.env.TEST_LIFETIME;
+export const RAW_TEST_LIFETIME = process.env.RAW_TEST_LIFETIME;
 export const ECS_CLUSTER_NAME = process.env.ECS_CLUSTER_NAME;
 export const ECS_TASK_DEFINITION_NAME = process.env.ECS_TASK_DEFINITION_NAME;
 export const TEST_INPUT_BUCKET = process.env.TEST_INPUT_BUCKET;

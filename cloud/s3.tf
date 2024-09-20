@@ -39,6 +39,19 @@ resource "aws_s3_bucket" "output_bucket" {
   bucket = local.test_output_bucket
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "output_bucket" {
+  bucket = aws_s3_bucket.output_bucket.id
+
+  rule {
+    id     = "expire_old_objects"
+    status = "Enabled"
+
+    expiration {
+      days = var.test_lifetime
+    }
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "public_output_bucket" {
   bucket = aws_s3_bucket.output_bucket.id
 

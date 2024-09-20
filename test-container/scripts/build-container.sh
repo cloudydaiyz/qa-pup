@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DIR=`dirname $0`
 docker build -t test-container -f "${DIR}/../Dockerfile" "${DIR}/.."

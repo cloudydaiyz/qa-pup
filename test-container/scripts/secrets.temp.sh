@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Use this file to generate your own `secrets.sh` file to make running the
 # docker container easier. This file (`secrets.sh`) is ignored by git so you can 

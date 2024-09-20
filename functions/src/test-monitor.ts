@@ -10,24 +10,24 @@ const findRunId = (task: Task) => {
     for(const o of task.overrides!.containerOverrides!) {
         for(const e of o.environment!) {
             if(e.name == "RUN_ID") {
-                return e.value;
+                return e.value as string;
             }
         }
     }
 }
 
 export const handler: EventBridgeHandler<"ECS Task State Change", Task, void> = async (event) => {
-    let runId = findRunId(event.detail);
+    let runId = findRunId(event.detail)!;
     assert(runId, "RUN_ID not found in task");
     
-    if(await isEcsTestRunComplete(runId!)) {
+    if(await isEcsTestRunComplete(runId)) {
         console.log("Test run complete");
 
         const lock = await getTestCompletionLock();
         if(lock == "OFF") {
             await setTestCompletionLock("ON");
             await pupService.connection;
-            await pupService.testLifecycleCleanup();
+            await pupService.testCompletion(runId);
             await setTestCompletionLock("OFF");
         }
     } else {

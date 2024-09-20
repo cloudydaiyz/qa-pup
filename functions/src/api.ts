@@ -45,7 +45,8 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             assert(event.body, "Invalid event body");
             const body = JSON.parse(event.body) as AddEmailBody;
 
-            assert(body.email && body.current != undefined, "Invalid event body");
+            assert(typeof body.email == "string" && typeof body.current == "boolean", 
+                "Invalid event body");
             await pupCore.addToEmailList(body.email, body.current);
         } else {
 

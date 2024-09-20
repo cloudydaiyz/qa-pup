@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 docker run \
     -e TEST_INPUT_BUCKET="$TEST_INPUT_BUCKET" \

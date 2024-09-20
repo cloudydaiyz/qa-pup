@@ -86,15 +86,24 @@ export async function triggerEcsTestRun(runId: string) {
         const startTaskCmd = new RunTaskCommand({
             cluster: ECS_CLUSTER_NAME,
             taskDefinition: ECS_TASK_DEFINITION_NAME,
+            launchType: "FARGATE",
             overrides: {
                 containerOverrides: [
                     {
+                        name: "test-container",
                         environment: [
                             { name: "RUN_ID", value: runId },
                             { name: "TEST_FILE", value: file },
                         ]
                     }
                 ]
+            },
+            networkConfiguration: {
+                awsvpcConfiguration: {
+                    subnets: ["subnet-0d91c93adea555bb1", "subnet-0a823849fb658e209", "subnet-044a28ad7345aa5f5"],
+                    securityGroups: [],
+                    assignPublicIp: "ENABLED"
+                }
             }
         });
         taskOperations.push(ecsClient.send(startTaskCmd));

@@ -112,12 +112,10 @@ export class PupCore {
                 { 
                     docType: "DASHBOARD", 
                     "currentRun.status": "RUNNING", 
-                    "currentRun.emailList": { 
-                        $size: { $lt: 10 },
-                        $elemMatch: { $ne: email } 
-                    } 
+                    $expr: { $lt: [ { $size: "$currentRun.emailList" }, 10 ] },
+                    "currentRun.emailList": { $ne: email } 
                 }, 
-                { $addToSet: { "currentRun.emailList": email } }
+                { $push: { "currentRun.emailList": email } }
             );
         } else {
 
@@ -126,12 +124,10 @@ export class PupCore {
             update = await this.testRunColl.updateOne(
                 { 
                     docType: "DASHBOARD", 
-                    "nextScheduledRun.emailList": { 
-                        $size: { $lt: 10 }, 
-                        $elemMatch: { $ne: email }  
-                    } 
+                    $expr: { $lt: [ { $size: "$nextScheduledRun.emailList" }, 10 ] },
+                    "nextScheduledRun.emailList": { $ne: email } 
                 }, 
-                { $addToSet: { "nextScheduledRun.emailList": email } }
+                { $push: { "nextScheduledRun.emailList": email } }
             );
         }
         assert(update.acknowledged && update.modifiedCount == 1, "Unable to add email to the email list");
@@ -168,7 +164,8 @@ export class PupService extends PupCore {
                     startTime: dashboard.currentRun.startTime,
                     latestTests: latestTestRunFiles,
                     currentRun: {
-                        state: "AT REST"
+                        state: "AT REST",
+                        emailList: []
                     }
                 }
             }, 

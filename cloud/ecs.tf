@@ -9,14 +9,56 @@ data "aws_iam_policy_document" "ecs_tasks_execution_assume_role" {
   }
 }
 
+# Create the ECS task execution role
+# This role is used by the ECS agent on the container instance to:
+# - pull container images
+# - obtain secrets from SSM
+# - publish container logs to CloudWatch Logs.
 resource "aws_iam_role" "ecs_tasks_execution_role" {
   name               = "ecs-task-execution-role"
   assume_role_policy = "${data.aws_iam_policy_document.ecs_tasks_execution_assume_role.json}"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role" {
-  role       = "${aws_iam_role.ecs_tasks_execution_role.name}"
+  role       = aws_iam_role.ecs_tasks_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+data "aws_iam_policy_document" "get_ssm_secrets" {
+  statement {
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath"
+    ]
+
+    resources = [
+      aws_ssm_parameter.test_completion_lock.arn,
+      aws_ssm_parameter.db_user.arn,
+      aws_ssm_parameter.db_pass.arn,
+      aws_ssm_parameter.region.arn,
+      aws_ssm_parameter.access_key.arn,
+      aws_ssm_parameter.secret_key.arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "logs:CreateLogGroup"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "get_params" {
+  name = "qa-pup-ecs-test-get-params"
+  description = "Allows test containers to get parameters from SSM"
+  policy = data.aws_iam_policy_document.get_ssm_secrets.json
+}
+
+resource "aws_iam_role_policy_attachment" "get_params" {
+  role       = aws_iam_role.ecs_tasks_execution_role.name
+  policy_arn = aws_iam_policy.get_params.arn
 }
 
 resource "aws_ecs_cluster" "cluster" {
@@ -63,7 +105,7 @@ resource "aws_ecs_task_definition" "test_task_definition" {
           valueFrom = aws_ssm_parameter.region.arn
         },
         {
-          name = "AWS_ACCESS_KEY"
+          name = "AWS_ACCESS_KEY_ID"
           valueFrom = aws_ssm_parameter.access_key.arn
         },
         {
@@ -71,6 +113,17 @@ resource "aws_ecs_task_definition" "test_task_definition" {
           valueFrom = aws_ssm_parameter.secret_key.arn
         }
       ]
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-create-group = "true"
+          awslogs-group = "/ecs/${local.ecs_task_definition}"
+          awslogs-region = var.aws_region
+          awslogs-stream-prefix = "ecs"
+          max-buffer-size = "25m"
+          mode = "non-blocking"
+        }
+      }
     }
   ])
 
