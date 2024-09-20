@@ -25,11 +25,11 @@ resource "aws_ssm_parameter" "region" {
 resource "aws_ssm_parameter" "db_user" {
   name  = "/qa-pup/db-user"
   type  = "String"
-  value = var.db_user
+  value = var.mongodb_user
 }
 
 resource "aws_ssm_parameter" "db_pass" {
   name  = "/qa-pup/db-pass"
   type  = "String"
-  value = var.db_pass
+  value = var.mongodb_pass
 }

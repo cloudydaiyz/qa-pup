@@ -27,9 +27,9 @@ locals {
   test_completion_lock = "/qa-pup/test-completion-lock"
   functions = toset(["api", "initialize", "scheduled-tasks", "test-monitor"])
   functions_base_env = {
-    MONGODB_URI = ""
-    MONGODB_USER = var.db_user
-    MONGODB_PASS = var.db_pass
+    MONGODB_URI = mongodbatlas_cluster.main_cluster.connection_strings[0].standard_srv
+    MONGODB_USER = var.mongodb_user
+    MONGODB_PASS = var.mongodb_pass
   }
 }
 
@@ -38,4 +38,20 @@ provider "aws" {
   region  = var.aws_region
   access_key = var.aws_access_key
   secret_key = var.aws_secret_access_key
+}
+
+provider "aws" {
+  alias = "us_east_1"
+  region  = "us-east-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_access_key
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
+provider "mongodbatlas" {
+  public_key  = var.mongodb_public_key
+  private_key = var.mongodb_private_key
 }

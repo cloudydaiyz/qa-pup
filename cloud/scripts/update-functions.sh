@@ -18,3 +18,8 @@ cp -r controllers "$ARTIFACTS_DIR"
 
 cd $CLOUD_DIR
 terraform plan -var-file=variables.tfvars
+
+# terraform validate
+# terraform plan -var-file=variables.tfvars
+# terraform apply -var-file=variables.tfvars --auto-approve
+# terraform destroy -var-file=variables.tfvars --auto-approve

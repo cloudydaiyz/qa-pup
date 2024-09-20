@@ -84,3 +84,24 @@ resource "aws_apigatewayv2_integration" "post_add_email" {
   description = "POST /add-email"
   payload_format_version = "1.0"
 }
+
+# Domain name configuration
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "api.qa-pup.cloudydaiyz.com"
+  validation_method = "DNS"
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  certificate_arn = aws_acm_certificate.cert.arn
+}
+
+resource "aws_apigatewayv2_domain_name" "api" {
+  domain_name = "api.qa-pup.cloudydaiyz.com"
+
+  domain_name_configuration {
+    certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
