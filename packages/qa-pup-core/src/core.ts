@@ -1,6 +1,6 @@
 import { DashboardSchema, LatestTestRunFile, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
-import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME } from "./constants";
+import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME, SENDER_EMAIL } from "./constants";
 import assert from "assert";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
@@ -174,9 +174,13 @@ export class PupService extends PupCore {
             && updateDashboard.modifiedCount == 1, "Unable to update dashboard");
         
         // Send test completion emails
+        console.log("Checking to send test completion emails");
+        let emailList = dashboard.currentRun.emailList;
+        if(emailList.indexOf(SENDER_EMAIL) == -1) emailList = emailList.concat(SENDER_EMAIL);
         if(dashboard.currentRun.emailList!.length > 0) {
+            console.log("Sending test completion emails");
             await import("./cloud").then(cloud => cloud.sendTestCompletionEmails(
-                dashboard.currentRun.emailList!, 
+                emailList, 
                 dashboard.nextScheduledRun.emailList,
                 runId, 
                 latestTestRunFiles, 

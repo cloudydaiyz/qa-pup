@@ -11,6 +11,10 @@ type AddEmailBody = {
     current: boolean;
 }
 
+type ManualRunBody = {
+    email?: string;
+}
+
 // == Handler ==
 
 export const handler: APIGatewayProxyHandler = async (event, context) => {
@@ -39,7 +43,12 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         } else if(manualRunPath && method == "POST") {
 
             let email = undefined;
-            if(event.body) email = JSON.parse(event.body).email;
+            if(event.body) {
+                const body = JSON.parse(event.body) as ManualRunBody;
+                assert(typeof body.email == "string" || body.email == undefined,
+                     "Invalid event body");
+                email = body.email;
+            } 
             await pupCore.triggerRun("MANUAL", email);
         } else if(addEmailPath && method == "POST") {
             assert(event.body, "Invalid event body");

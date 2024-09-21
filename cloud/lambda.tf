@@ -2,7 +2,7 @@
 
 data "archive_file" "layer" {
   type        = "zip"
-  source_dir = "${path.module}/artifacts/layer"
+  source_dir  = "${path.module}/artifacts/layer"
   output_path = "${path.module}/artifacts/layer/layer.zip"
 }
 
@@ -19,7 +19,7 @@ resource "aws_lambda_layer_version" "lambda_layer" {
   layer_name = "qa-pup-functions"
 
   compatible_runtimes = ["nodejs20.x"]
-  source_code_hash = data.archive_file.layer.output_base64sha256
+  source_code_hash    = data.archive_file.layer.output_base64sha256
 }
 
 # Assume role policy for the IAM role of any lambda
@@ -40,54 +40,33 @@ data "aws_iam_policy_document" "functions_assume_role" {
 
 data "aws_iam_policy_document" "api" {
   statement {
-    actions = [
-      "logs:CreateLogGroup"
-    ]
-    resources = [
-      "arn:aws:logs:${var.aws_region}:${local.account_id}:*"
-    ]
+    actions   = ["logs:CreateLogGroup"]
+    resources = ["arn:aws:logs:${var.aws_region}:${local.account_id}:*"]
   }
 
   statement {
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = [
-      "arn:aws:logs:${var.aws_region}:${local.account_id}:log-group:/aws/lambda/qa-pup-api:*"
-    ]
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["arn:aws:logs:${var.aws_region}:${local.account_id}:log-group:/aws/lambda/qa-pup-api:*"]
   }
 
   statement {
-    actions = [
-      "s3:ListBucket"
-    ]
-    resources = [
-      "arn:aws:s3:::${local.test_input_bucket}"
-    ]
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${local.test_input_bucket}"]
   }
 
   statement {
-    actions = [
-      "ses:VerifyEmailIdentity"
-    ]
-    resources = [ "*" ]
+    actions   = ["ses:VerifyEmailIdentity"]
+    resources = ["*"]
   }
 
   statement {
-    actions = [
-      "iam:PassRole"
-    ]
-    resources = [ aws_iam_role.ecs_tasks_execution_role.arn ]
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.ecs_tasks_execution_role.arn]
   }
 
   statement {
-    actions = [
-      "ecs:RunTask"
-    ]
-    resources = [ 
-      "arn:aws:ecs:${var.aws_region}:${local.account_id}:test-definition/${local.ecs_task_definition}:*"
-    ]
+    actions   = ["ecs:RunTask"]
+    resources = [aws_ecs_task_definition.test_task_definition.arn]
   }
 }
 
@@ -109,15 +88,15 @@ resource "aws_lambda_function" "api" {
   role             = aws_iam_role.api.arn
   handler          = "api.handler"
   source_code_hash = data.archive_file.function["api"].output_base64sha256
-  layers = [ aws_lambda_layer_version.lambda_layer.arn ]
-  timeout = 20
+  layers           = [aws_lambda_layer_version.lambda_layer.arn]
+  timeout          = 20
 
   runtime = "nodejs20.x"
 
   environment {
     variables = merge(local.functions_base_env, {
-      TEST_INPUT_BUCKET = local.test_input_bucket
-      ECS_CLUSTER_NAME = local.ecs_cluster
+      TEST_INPUT_BUCKET        = local.test_input_bucket
+      ECS_CLUSTER_NAME         = local.ecs_cluster
       ECS_TASK_DEFINITION_NAME = local.ecs_task_definition
     })
   }
@@ -162,14 +141,14 @@ data "aws_iam_policy_document" "scheduled_tasks" {
     actions = [
       "iam:PassRole"
     ]
-    resources = [ aws_iam_role.ecs_tasks_execution_role.arn ]
+    resources = [aws_iam_role.ecs_tasks_execution_role.arn]
   }
 
   statement {
     actions = [
       "ecs:RunTask"
     ]
-    resources = [ aws_ecs_task_definition.test_task_definition.arn ]
+    resources = [aws_ecs_task_definition.test_task_definition.arn]
   }
 }
 
@@ -191,16 +170,16 @@ resource "aws_lambda_function" "scheduled_tasks" {
   role             = aws_iam_role.scheduled_tasks.arn
   handler          = "scheduled-tasks.handler"
   source_code_hash = data.archive_file.function["scheduled-tasks"].output_base64sha256
-  layers = [ aws_lambda_layer_version.lambda_layer.arn ]
-  timeout = 20
+  layers           = [aws_lambda_layer_version.lambda_layer.arn]
+  timeout          = 20
 
   runtime = "nodejs20.x"
 
   environment {
     variables = merge(local.functions_base_env, {
-      RAW_TEST_LIFETIME = tostring(var.test_lifetime)
-      TEST_INPUT_BUCKET = local.test_input_bucket
-      ECS_CLUSTER_NAME = local.ecs_cluster
+      RAW_TEST_LIFETIME        = tostring(var.test_lifetime)
+      TEST_INPUT_BUCKET        = local.test_input_bucket
+      ECS_CLUSTER_NAME         = local.ecs_cluster
       ECS_TASK_DEFINITION_NAME = local.ecs_task_definition
     })
   }
@@ -244,10 +223,10 @@ data "aws_iam_policy_document" "test_monitor" {
 
   statement {
     actions = [
-	    "ses:DeleteIdentity",
+      "ses:DeleteIdentity",
       "ses:GetIdentityVerificationAttributes"
     ]
-    resources = [ "*" ]
+    resources = ["*"]
   }
 
   statement {
@@ -255,7 +234,7 @@ data "aws_iam_policy_document" "test_monitor" {
       "ses:SendEmail"
     ]
     resources = [
-      "arn:aws:ses:${var.aws_region}:${local.account_id}:identity/${var.sender_email}/*",
+      "arn:aws:ses:${var.aws_region}:${local.account_id}:identity/*",
     ]
   }
 
@@ -289,16 +268,16 @@ resource "aws_lambda_function" "test_monitor" {
   role             = aws_iam_role.test_monitor.arn
   handler          = "test-monitor.handler"
   source_code_hash = data.archive_file.function["test-monitor"].output_base64sha256
-  layers = [ aws_lambda_layer_version.lambda_layer.arn ]
-  timeout = 20
+  layers           = [aws_lambda_layer_version.lambda_layer.arn]
+  timeout          = 20
 
   runtime = "nodejs20.x"
 
   environment {
     variables = merge(local.functions_base_env, {
-      ECS_CLUSTER_NAME = local.ecs_cluster
+      ECS_CLUSTER_NAME     = local.ecs_cluster
       TEST_COMPLETION_LOCK = local.test_completion_lock
-      SENDER_EMAIL = var.sender_email
+      SENDER_EMAIL         = var.sender_email
     })
   }
 
@@ -333,7 +312,7 @@ data "aws_iam_policy_document" "initialize" {
     actions = [
       "ses:VerifyEmailIdentity"
     ]
-    resources = [ "*" ]
+    resources = ["*"]
   }
 }
 
@@ -355,8 +334,8 @@ resource "aws_lambda_function" "initialize" {
   role             = aws_iam_role.initialize.arn
   handler          = "initialize.handler"
   source_code_hash = data.archive_file.function["initialize"].output_base64sha256
-  layers = [ aws_lambda_layer_version.lambda_layer.arn ]
-  timeout = 20
+  layers           = [aws_lambda_layer_version.lambda_layer.arn]
+  timeout          = 20
 
   runtime = "nodejs20.x"
 

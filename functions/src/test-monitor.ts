@@ -23,12 +23,17 @@ export const handler: EventBridgeHandler<"ECS Task State Change", Task, void> = 
     if(await isEcsTestRunComplete(runId)) {
         console.log("Test run complete");
 
-        const lock = await getTestCompletionLock();
-        if(lock == "OFF") {
-            await setTestCompletionLock("ON");
-            await pupService.connection;
-            await pupService.testCompletion(runId);
-            await setTestCompletionLock("OFF");
+        try {
+            const lock = await getTestCompletionLock();
+            if(lock == "OFF") {
+                await setTestCompletionLock("ON");
+                await pupService.connection;
+                await pupService.testCompletion(runId);
+                await setTestCompletionLock("OFF");
+            }
+        } catch(e) {
+            console.log("Unable to handle test run completion.");
+            console.log((e as Error).message);
         }
     } else {
         console.log("Test run incomplete");

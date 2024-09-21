@@ -19,6 +19,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
 export async function sendTestCompletionEmails(
     emailList: string[], nextRunEmailList: string[], 
     runId: string, latestTestRunFiles: LatestTestRunFile[]): Promise<void> { 
+    console.log("Email list: " + emailList);
     const client = new SESClient();
 
     // Retrieve only the verified emails from the list
@@ -30,14 +31,14 @@ export async function sendTestCompletionEmails(
         email in getVerificationsRes.VerificationAttributes!
         && getVerificationsRes.VerificationAttributes![email].VerificationStatus == "Success"
     );
+    console.log("Filtered email list: " + emailList);
 
     // Send the templated email
     const htmlData = await import("./email").then(m => m.composeEmailBody(runId, latestTestRunFiles));
     const sendEmail = new SendEmailCommand({
         Source: SENDER_EMAIL,
         Destination: {
-            ToAddresses: [ SENDER_EMAIL ],
-            BccAddresses: emailList,
+            BccAddresses: emailList
         },
         Message: {
             Subject: {
@@ -56,9 +57,11 @@ export async function sendTestCompletionEmails(
     // next scheduled run
     const emailsToRemove = emailList
         .filter(email => 
-            !nextRunEmailList.includes(email) 
+            email != SENDER_EMAIL
+            && !nextRunEmailList.includes(email) 
             && email in getVerificationsRes.VerificationAttributes!
         );
+    console.log("Email delete list: " + emailsToRemove);
     
     const removeEmailOps = [];
     for(const email of emailsToRemove) {
@@ -77,11 +80,16 @@ export async function triggerEcsTestRun(runId: string) {
     const listObjectsCmd = new ListObjectsV2Command({
         Bucket: TEST_INPUT_BUCKET
     });
-    const files = (await s3Client.send(listObjectsCmd)).Contents!.map(obj => obj.Key!);
+    const listObjectsRes = await s3Client.send(listObjectsCmd)
+    console.log("Files in bucket:")
+    console.log(listObjectsRes)
+    const files = listObjectsRes.Contents!.map(obj => obj.Key!);
+    console.log("Files:")
+    console.log(files)
 
     // Run a task for each file using the predefined task definition
     const taskOperations = [];
-    for(const file in files) {
+    for(const file of files) {
         const ecsClient = new ECSClient();
         const startTaskCmd = new RunTaskCommand({
             cluster: ECS_CLUSTER_NAME,

@@ -14,8 +14,8 @@ variable "aws_region" {
 }
 
 variable "cloudflare_api_token" {
-    type = string
-    description = "API token for Cloudflare"
+  type        = string
+  description = "API token for Cloudflare"
 }
 
 variable "mongodb_public_key" {
@@ -56,5 +56,5 @@ variable "sender_email" {
 variable "test_lifetime" {
   type        = number
   description = "Lifetime of test data in days."
-  default = 7
+  default     = 7
 }

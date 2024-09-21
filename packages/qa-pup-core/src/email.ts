@@ -47,9 +47,9 @@ const testCompletionEmailTemplate = `
 `;
 
 const testRunBlockTemplate = `
-        <mj-text font-size="20px"><strong><--! Name --></strong></mj-text>
-        <mj-text font-size="18px">Duration: <--! Duration --></mj-text>
-        <mj-text font-size="18px">Status: <--! Status --></mj-text>
+        <mj-text font-size="20px"><strong><!-- Name --></strong></mj-text>
+        <mj-text font-size="18px">Duration: <!-- Duration --></mj-text>
+        <mj-text font-size="18px">Status: <!-- Status --></mj-text>
         <mj-text>&nbsp;</mj-text>
 
 `;

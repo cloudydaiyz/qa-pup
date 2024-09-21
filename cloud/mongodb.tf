@@ -35,7 +35,7 @@ resource "mongodbatlas_project_ip_access_list" "allow_all_ips" {
 
 resource "mongodbatlas_database_user" "admin" {
   # https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/database_user#password
-  password           = var.mongodb_pass
+  password = var.mongodb_pass
 
   username           = var.mongodb_user
   project_id         = mongodbatlas_project.project.id
