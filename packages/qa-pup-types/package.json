@@ -7,7 +7,7 @@
   ],
   "author": "Kylan Duncan",
   "license": "ISC",
-  "version": "3.0.1",
+  "version": "3.4.0",
   "types": "lib/types.d.ts",
   "scripts": {
     "prepare": "tsc"

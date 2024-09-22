@@ -8,6 +8,23 @@ import { ECS_CLUSTER_NAME, ECS_TASK_DEFINITION_NAME, SENDER_EMAIL, TEST_COMPLETI
 import assert from "assert";
 
 
+// Checks if the provided email address is verified with AWS SES
+export async function isEmailVerified(email: string): Promise<boolean> {
+    try {
+        const client = new SESClient();
+        const cmd = new GetIdentityVerificationAttributesCommand({ Identities: [email] });
+        const res = await client.send(cmd);
+        assert(
+            email in res.VerificationAttributes! &&
+            res.VerificationAttributes![email].VerificationStatus == "Success"
+        );
+    } catch(e) {
+        console.log(e);
+        return false;
+    }
+    return true;
+}
+
 // Sends AWS boilerplate email to verify an email address for sending
 export async function sendVerificationEmail(email: string): Promise<void> {
     const client = new SESClient();
@@ -28,8 +45,8 @@ export async function sendTestCompletionEmails(
     );
     const getVerificationsRes = await client.send(getVerifications);
     emailList = emailList.filter(email => 
-        email in getVerificationsRes.VerificationAttributes!
-        && getVerificationsRes.VerificationAttributes![email].VerificationStatus == "Success"
+        email in getVerificationsRes.VerificationAttributes! &&
+        getVerificationsRes.VerificationAttributes![email].VerificationStatus == "Success"
     );
     console.log("Filtered email list: " + emailList);
 
@@ -57,9 +74,9 @@ export async function sendTestCompletionEmails(
     // next scheduled run
     const emailsToRemove = emailList
         .filter(email => 
-            email != SENDER_EMAIL
-            && !nextRunEmailList.includes(email) 
-            && email in getVerificationsRes.VerificationAttributes!
+            email != SENDER_EMAIL &&
+            !nextRunEmailList.includes(email) &&
+            email in getVerificationsRes.VerificationAttributes!
         );
     console.log("Email delete list: " + emailsToRemove);
     

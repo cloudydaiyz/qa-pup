@@ -55,7 +55,10 @@ data "aws_iam_policy_document" "api" {
   }
 
   statement {
-    actions   = ["ses:VerifyEmailIdentity"]
+    actions   = [
+      "ses:VerifyEmailIdentity",
+      "ses:GetIdentityVerificationAttributes"
+    ]
     resources = ["*"]
   }
 
@@ -177,7 +180,7 @@ resource "aws_lambda_function" "scheduled_tasks" {
 
   environment {
     variables = merge(local.functions_base_env, {
-      RAW_TEST_LIFETIME        = tostring(var.test_lifetime)
+      RAW_TEST_LIFETIME        = tostring(var.test_lifetime * 24 * 60 * 60 * 1000)
       TEST_INPUT_BUCKET        = local.test_input_bucket
       ECS_CLUSTER_NAME         = local.ecs_cluster
       ECS_TASK_DEFINITION_NAME = local.ecs_task_definition
@@ -314,6 +317,17 @@ data "aws_iam_policy_document" "initialize" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:DeleteObjects"
+    ]
+    resources = [
+      "arn:aws:s3:::${local.test_output_bucket}",
+      "arn:aws:s3:::${local.test_output_bucket}/*"
+    ]
+  }
 }
 
 resource "aws_iam_role" "initialize" {
@@ -341,6 +355,7 @@ resource "aws_lambda_function" "initialize" {
 
   environment {
     variables = merge(local.functions_base_env, {
+      TEST_OUTPUT_BUCKET        = local.test_output_bucket
       SENDER_EMAIL = var.sender_email
     })
   }

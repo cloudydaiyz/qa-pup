@@ -1,10 +1,19 @@
-import { DashboardSchema, LatestTestRunFile, RunType, TestMetadataSchema, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { Dashboard, DashboardSchema, LatestTestRunFile, RunType, TestMetadata, TestMetadataSchema, TestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
 import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME, SENDER_EMAIL } from "./constants";
+import cronParser from "aws-cron-parser";
 import assert from "assert";
 
 type TestRunCollection = DashboardSchema | TestRunFileSchema;
 type TestMetadataCollection = TestMetadataSchema;
+
+// To help catch and relay client-based errors
+export class PupError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "PupError";
+    }
+}
 
 // Implementation for client-facing controller methods
 export class PupCore {
@@ -29,29 +38,74 @@ export class PupCore {
         assert(dashboard, "MongoDB improperly initialized");
         return dashboard;
     }
+
+    public async readPublicDashboard(): Promise<Dashboard> {
+        const dashboard = await this.readDashboardInfo();
+
+        const publicDashboard: Dashboard = {
+            ...dashboard,
+            startTime: dashboard.startTime.toJSON(),
+            manualRun: {
+                remaining: dashboard.manualRun.remaining,
+                max: dashboard.manualRun.max,
+                nextRefresh: dashboard.manualRun.nextRefresh.toJSON()
+            },
+            nextScheduledRun: {
+                startTime: dashboard.nextScheduledRun.startTime.toJSON(),
+            },
+            currentRun: {
+                state: dashboard.currentRun.state,
+                startTime: dashboard.currentRun.startTime?.toJSON(),
+                runId: dashboard.currentRun.runId,
+                runType: dashboard.currentRun.runType,
+            }
+        };
+        return publicDashboard;
+    }
     
     // Obtains the info for a specific test run
-    public async readLatestTestInfo(runId: string, name: string): Promise<TestRunFileSchema> {
+    public async readLatestTestInfo(runId: string, name: string): Promise<TestRunFileSchema | null> {
         const testInfo = await this.testRunColl.findOne(
             { docType: "TEST_RUN_FILE", runId, name },
             { projection: { _id: 0 } }
-        ) as TestRunFileSchema;
-        assert(testInfo, "No test info currently available for the specified test run");
+        ) as TestRunFileSchema | null;
         return testInfo;
+    }
+
+    public async readPublicLatestTestInfo(runId: string, name: string): Promise<TestRunFile | null> {
+        const testInfo = await this.readLatestTestInfo(runId, name);
+        if(!testInfo) return null;
+
+        const publicTests: TestMetadata[] = [];
+        for(const test of testInfo.tests) {
+            publicTests.push({
+                ...test,
+                startTime: test.startTime.toJSON(),
+            });
+        }
+    
+        const publicTestInfo: TestRunFile = {
+            ...testInfo,
+            tests: publicTests,
+            startTime: testInfo.startTime.toJSON(),
+        };
+        return publicTestInfo;
     }
     
     // Triggers a scheduled or manual test run with the optionally specified email on the email list
     // NOTE: Scheduled runs can't have with the email parameter
-    public async triggerRun(runType: RunType, email?: string): Promise<void> {
-        assert(runType == "MANUAL" || !email, "Scheduled runs cannot have an email parameter");
+    public async triggerRun(runType: RunType, email?: string, cron?: string): Promise<void> {
+        const cloud = await import("./cloud");
+        assert(!email || runType == "MANUAL", "Scheduled runs cannot have an email parameter");
+        assert(!email || await cloud.isEmailVerified(email), new PupError("Email not verified"));
 
         // Obtain and validate parameters against the dashboard
         const dashboard = await this.readDashboardInfo();
-        assert(dashboard.currentRun.state == "AT REST", "A test run is already in progress");
+        assert(dashboard.currentRun.state == "AT REST", new PupError("A test run is already in progress"));
         assert(
-            runType == "SCHEDULED" 
-            || Date.now() + FULL_HOUR < dashboard.nextScheduledRun.startTime.getTime(), 
-            "Cannot trigger a test run within an hour of a scheduled run."
+            runType == "SCHEDULED" ||
+            Date.now() + FULL_HOUR < dashboard.nextScheduledRun.startTime.getTime(), 
+            new PupError("Cannot trigger a manual run within an hour of a scheduled run.")
         );
 
         // Initalize the filter to update the test run collection
@@ -71,21 +125,21 @@ export class PupCore {
 
         // Update the filter based on the run type
         if(runType == "SCHEDULED") {
-            assert(Date.now() > dashboard.nextScheduledRun.startTime.getTime(), 
-                "Scheduled run not ready to be triggered");
+            assert(cron, "Cron expression not provided for scheduled run");
+            const interval = cronParser.parse(cron);
 
             // Update the stats of the next scheduled run
             const scheduleList = dashboard.nextScheduledRun.emailList;
             updateFilter.$set = {
                 ...updateFilter.$set, 
                 nextScheduledRun: {
-                    startTime: new Date(Date.now() + FULL_DAY),
+                    startTime: cronParser.next(interval, new Date())!,
                     emailList: []
                 }
             };
             updateFilter.$set.currentRun.emailList = scheduleList;
         } else {
-            assert(dashboard.manualRun.remaining > 0, "No manual runs remaining for today");
+            assert(dashboard.manualRun.remaining > 0, new PupError("No manual runs remaining for today"));
 
             // Decrement the remaining amount of manual runs
             updateFilter.$inc = { "manualRun.remaining": -1 };
@@ -97,13 +151,16 @@ export class PupCore {
             "Dashboard update failed");
 
         // Start the test runs in ECS cluster
-        await import("./cloud").then(cloud => cloud.triggerEcsTestRun(runId));
+        await cloud.triggerEcsTestRun(runId);
     }
 
     // Adds an email to the list of emails to be notified for the current or next scheduled run
-    // Returns true if the email was successfully added, false otherwise
     public async addToEmailList(email: string, current?: boolean): Promise<void> {
+        const cloud = await import("./cloud");
+        assert(await cloud.isEmailVerified(email), new PupError("Email not verified"));
+
         let update: UpdateResult;
+        let errorMsg: string;
         if(current) {
 
             // Add the email to the list of emails to be notified for the current run 
@@ -117,6 +174,9 @@ export class PupCore {
                 }, 
                 { $push: { "currentRun.emailList": email } }
             );
+            errorMsg = "Unable to add email to the email list; "
+                    + "there may not be a run currently ongoing, "
+                    + "email may already be on the list, or the list is full.";
         } else {
 
             // Add the email to the list of emails to be notified for the next scheduled run 
@@ -129,11 +189,13 @@ export class PupCore {
                 }, 
                 { $push: { "nextScheduledRun.emailList": email } }
             );
+            errorMsg = "Unable to add email to the email list; \
+                    email may already be on the list, or the list is full.";
         }
-        assert(update.acknowledged && update.modifiedCount == 1, "Unable to add email to the email list");
 
-        // Sends AWS verification email
-        await import("./cloud").then(cloud => cloud.sendVerificationEmail(email));
+        assert(update.acknowledged, "Update not acknowledged");
+        assert(update.matchedCount == 1, new PupError(errorMsg!));
+        assert(update.modifiedCount == 1, "Email list modification unsuccessful");
     }
 }
 
@@ -189,17 +251,18 @@ export class PupService extends PupCore {
     }
     
     // Handles the cleanup of old tests and manual run refreshes
-    public async testLifecycleCleanup(): Promise<void> {
+    public async testLifecycleCleanup(cron: string): Promise<void> {
         assert(RAW_TEST_LIFETIME, "Invalid environment variable RAW_TEST_LIFETIME");
         const TEST_LIFETIME = Number(RAW_TEST_LIFETIME);
         const operations = [];
-
+        
         // Refresh the number of manual runs
+        const interval = cronParser.parse(cron);
         operations.push(this.testRunColl.updateOne(
             { docType: "DASHBOARD" }, 
             { $set: { 
                 "manualRun.remaining": MAX_DAILY_MANUAL_TESTS, 
-                "manualRun.nextRefresh": new Date(Date.now() + FULL_DAY) 
+                "manualRun.nextRefresh": cronParser.next(interval, new Date(Date.now())) 
             } }
         ));
 
@@ -223,18 +286,16 @@ export class PupService extends PupCore {
 
     // Adds information from one file's test run into the database
     public async addTestRunFile(file: TestRunFileSchema): Promise<void> {
-        const tests = file.tests;
+        const metadata = file.tests;
 
-        // FUTURE: Limit the number of tests stored in the document
-        // file.tests = file.tests.slice(0, 10); 
+        // Limit the number of tests stored in the document
+        file.tests = file.tests.slice(0, 10); 
         
         // Insert the test run file and its metadata
         const insertTest = await this.testRunColl.insertOne(file);
         assert(insertTest.acknowledged, "Test run file insertion failed");
 
-        let metadata = tests;
         metadata.forEach(test => test.testRunFileId = insertTest.insertedId.toHexString());
-
         const insertMetadata = await this.testMetadataColl.insertMany(metadata);
         assert(insertMetadata.acknowledged, "Test metadata insertion failed");
     }

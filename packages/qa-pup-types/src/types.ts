@@ -28,13 +28,13 @@ export interface DashboardSchema {
     // Information to be used for the next scheduled run
 	nextScheduledRun: {
 		startTime: Date,
-		emailList: string[]
+		emailList: string[],
 	},
 
     // Information about the current run
 	currentRun: {
 		state: RunState,
-		emailList: string[]
+		emailList: string[],
 		runType?: RunType,
 		runId?: string, // stringified ObjectId
 		startTime?: Date, 
@@ -45,7 +45,7 @@ export interface DashboardSchema {
 export interface LatestTestRunFile {
     name: string,
     duration: number,
-    status: RunStatus
+    status: RunStatus,
 }
 
 // === Test Run File Document Schema ===
@@ -57,7 +57,7 @@ export interface TestRunFileSchema {
 	// Coincides with information from LatestTestRunFile
 	name: string, // key name of the test file
 	duration: number, // computed, based on latest end time of all tests
-    status: RunStatus // computed, based on status of all tests 
+    status: RunStatus, // computed, based on status of all tests 
 
 	// Test information
 	runId: string, // stringified ObjectId
@@ -89,11 +89,67 @@ export interface TestMetadataSchema {
     startTime: Date,
     duration: number,
     status: RunStatus,
-	assets: TestAsset[] 
+	assets: TestAsset[], 
 }
 
 // Asset generated from test run
 export interface TestAsset {
     name: string, // name of asset
-    objectUrl: string // s3 object url for asset
+    objectUrl: string, // s3 object url for asset
+}
+
+// == Public API Types ==
+
+export interface Dashboard {
+	runId: string,
+	runType: RunType,
+	startTime: string,
+
+	latestTests: LatestTestRunFile[], 
+
+	manualRun: {
+		remaining: number,
+		max: number,
+		nextRefresh: string,
+	},
+
+	nextScheduledRun: {
+		startTime: string,
+	},
+
+	currentRun: {
+		state: RunState,
+		runType?: RunType,
+		runId?: string,
+		startTime?: string, 
+	}
+}
+
+export interface TestRunFile {
+	name: string,
+	duration: number,
+	status: RunStatus,
+
+	runId: string,
+	startTime: string,
+	testsRan: number,
+	testsPassed: number,
+
+	tests: TestMetadata[],
+	
+	sourceObjectUrl: string,
+	reporters: {
+		htmlStaticUrl: string,
+		jsonObjectUrl: string
+	}
+}
+
+export interface TestMetadata {
+	testRunFileId?: string,
+    suiteName?: string,
+    testName: string,
+    startTime: string,
+    duration: number,
+    status: RunStatus,
+	assets: TestAsset[], 
 }

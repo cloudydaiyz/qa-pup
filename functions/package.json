@@ -8,7 +8,7 @@
     "build": "tsc && node scripts/rename-js-to-mjs.js"
   },
   "dependencies": {
-    "@cloudydaiyz/qa-pup-core": "^2.1.17",
+    "@cloudydaiyz/qa-pup-core": "^2.6.4",
     "mjml": "^4.15.3",
     "mongodb": "^6.8.1"
   },

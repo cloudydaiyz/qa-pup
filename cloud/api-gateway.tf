@@ -15,7 +15,7 @@ resource "aws_apigatewayv2_deployment" "http_api_deployment" {
   api_id = aws_apigatewayv2_api.http_api.id
 }
 
-resource "aws_apigatewayv2_stage" "example" {
+resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "$default"
   auto_deploy = true
@@ -69,6 +69,38 @@ resource "aws_apigatewayv2_integration" "post_manual_run" {
   payload_format_version = "1.0"
 }
 
+resource "aws_apigatewayv2_route" "post_check_email" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "POST /check-email"
+
+  target = "integrations/${aws_apigatewayv2_integration.post_check_email.id}"
+}
+
+resource "aws_apigatewayv2_integration" "post_check_email" {
+  api_id                 = aws_apigatewayv2_api.http_api.id
+  integration_type       = "AWS_PROXY"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.api.invoke_arn
+  description            = "POST /check-email"
+  payload_format_version = "1.0"
+}
+
+resource "aws_apigatewayv2_route" "post_verify_email" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "POST /verify-email"
+
+  target = "integrations/${aws_apigatewayv2_integration.post_verify_email.id}"
+}
+
+resource "aws_apigatewayv2_integration" "post_verify_email" {
+  api_id                 = aws_apigatewayv2_api.http_api.id
+  integration_type       = "AWS_PROXY"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.api.invoke_arn
+  description            = "POST /verify-email"
+  payload_format_version = "1.0"
+}
+
 resource "aws_apigatewayv2_route" "post_add_email" {
   api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "POST /add-email"
@@ -104,4 +136,10 @@ resource "aws_apigatewayv2_domain_name" "api" {
     endpoint_type   = "REGIONAL"
     security_policy = "TLS_1_2"
   }
+}
+
+resource "aws_apigatewayv2_api_mapping" "mapping" {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  domain_name = aws_apigatewayv2_domain_name.api.id
+  stage       = aws_apigatewayv2_stage.default.id
 }

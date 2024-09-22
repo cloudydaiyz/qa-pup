@@ -1,28 +1,28 @@
 import { PupService } from "@cloudydaiyz/qa-pup-core";
-import assert from "assert";
+import { LambdaDefaultReturn } from "./types.js";
 
 const pupService = new PupService();
 
 type ScheduledTask = {
-    task: "run" | "cleanup"
+    cron: string;
+    task: "run" | "cleanup";
 }
 
-export const handler = async (event: ScheduledTask) => {
+export const handler = async (event: ScheduledTask): Promise<LambdaDefaultReturn> => {
     await pupService.connection;
 
-    let body = JSON.stringify({ message: "Operation successful" });
     try {
         if(event.task == "run") {
-            await pupService.triggerRun("SCHEDULED");
+            await pupService.triggerRun("SCHEDULED", undefined, event.cron);
         } else if(event.task == "cleanup") {
-            await pupService.testLifecycleCleanup();
+            await pupService.testLifecycleCleanup(event.cron);
         } else {
             throw new Error("Invalid task");
         }
     } catch(e) {
 
-        body = JSON.stringify({ message: (e as Error).message });
-        return { statusCode: 400, body };
+        console.log(e);
+        return { statusCode: 400 };
     }
     
     return { statusCode: 200 };
