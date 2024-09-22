@@ -5,12 +5,16 @@ import { PupCore } from "@cloudydaiyz/qa-pup-core";
 import { isEmailVerified, sendVerificationEmail } from "@cloudydaiyz/qa-pup-core/cloud";
 import { DeleteObjectsCommand, ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
 import { LambdaDefaultReturn } from "./types.js";
+import cronParser from "aws-cron-parser";
 
 const pupCore = new PupCore();
 
 export const handler = async (): Promise<LambdaDefaultReturn> => {
     
     try {
+        const runInterval = cronParser.parse(process.env.RUN_INTERVAL!);
+        const cleanupInterval = cronParser.parse(process.env.CLEANUP_INTERVAL!);
+
         await pupCore.connection;
 
         // Initialize database index (helps with finding dashboard vs test files)
@@ -29,10 +33,10 @@ export const handler = async (): Promise<LambdaDefaultReturn> => {
                     manualRun: {
                         remaining: 3,
                         max: 3,
-                        nextRefresh: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                        nextRefresh: cronParser.next(cleanupInterval, new Date())!,
                     },
                     nextScheduledRun: {
-                        startTime: new Date(),
+                        startTime: cronParser.next(runInterval, new Date())!,
                         emailList: []
                     },
                     currentRun: {

@@ -357,6 +357,8 @@ resource "aws_lambda_function" "initialize" {
     variables = merge(local.functions_base_env, {
       TEST_OUTPUT_BUCKET        = local.test_output_bucket
       SENDER_EMAIL = var.sender_email
+      RUN_INTERVAL = local.scheduled_run_cron
+      CLEANUP_INTERVAL = local.scheduled_cleanup_cron
     })
   }
 
