@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Runs the container made by /test-container
+
 docker run \
     -e TEST_INPUT_BUCKET="$TEST_INPUT_BUCKET" \
     -e TEST_FILE="$TEST_FILE" \

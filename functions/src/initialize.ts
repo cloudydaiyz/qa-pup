@@ -52,12 +52,14 @@ export const handler = async (): Promise<LambdaDefaultReturn> => {
         const s3Client = new S3Client();
         const objects = await s3Client.send(new ListObjectsCommand({ Bucket: process.env.TEST_OUTPUT_BUCKET! }));
         if(objects.Contents && objects.Contents?.length > 0) {
-            const objectKeys = objects.Contents?.map(obj => { return { Key: obj.Key } })
+            const objectKeys = objects.Contents?.map(obj => { return { Key: obj.Key } });
+            console.log(objectKeys);
 
-            await s3Client.send(new DeleteObjectsCommand({
+            const res = await s3Client.send(new DeleteObjectsCommand({
                 Bucket: process.env.TEST_OUTPUT_BUCKET!,
                 Delete: { Objects: objectKeys }
             }));
+            console.log(res.Deleted, res.Errors);
         }
         
         // Send verification email to main sender email if it's not already verified in SES

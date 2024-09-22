@@ -1,12 +1,21 @@
 #!/bin/bash
 
-# Update packages and run scripts to apply changes
+# Updates the packages in /packages in depedenency directories depending on the
+# provided flag 
 
 # NOTE: npm version and npm publish are not ran in this script; they must be ran
 # separately. This means the qa-pup-types pkg in qa-pup-core must be updated
 # manually.
 
-# usage: update-pkg.sh [core|types] [-a | -n | -c | -t | -f | -w]
+# usage: update-pkg.sh core|types flag
+
+# Flags:
+# -a: update all dependencies
+# -n: do not update any dependencies
+# -c: update container
+# -t: update terraform
+# -f: update cloud functions
+# -w: update website
 
 DIR="`pwd`/`dirname $0`"
 

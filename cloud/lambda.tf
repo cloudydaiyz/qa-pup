@@ -321,7 +321,7 @@ data "aws_iam_policy_document" "initialize" {
   statement {
     actions = [
       "s3:ListBucket",
-      "s3:DeleteObjects"
+      "s3:DeleteObject"
     ]
     resources = [
       "arn:aws:s3:::${local.test_output_bucket}",

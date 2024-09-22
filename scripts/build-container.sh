@@ -1,6 +1,8 @@
 #!/bin/bash
 
-DIR=`dirname $0`
+# Builds the container in /test-container
+
+DIR="`dirname $0`/../test-container"
 docker build -t test-container -f "${DIR}/../Dockerfile" "${DIR}/.."
 
 if [ -f "${DIR}/secrets.sh" ]; then
