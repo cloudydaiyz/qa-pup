@@ -1,0 +1,63 @@
+nav {
+    flex-basis: 30%;
+    background-color: var(--white);
+    padding-top: 3rem;
+}
+
+h1 {
+    margin-left: 2rem;
+    margin-bottom: 2rem;
+    color: var(--primary);
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    transition: all .2s;
+}
+
+li:hover {
+    background-color: rgb(from var(--primary) r g b / .25);
+}
+
+li:hover button {
+    color: var(--primary);
+}
+
+li button {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-family: var(--primary-font);
+    font-weight: 400;
+    color: var(--black);
+    height: 100%;
+    width: 100%;
+    padding: 16px 0;
+    padding-left: 2rem;
+    text-align: left;
+}
+
+li button:enabled:hover {
+    cursor: pointer;
+}
+
+li button:enabled:active {
+    color: var(--white);
+    cursor: initial;
+}
+
+li button:disabled {
+    background-color: rgb(from var(--primary) r g b);
+}
+
+li button:disabled {
+    font-weight: 700;
+    /* color: var(--primary); */
+    color: var(--white);
+}

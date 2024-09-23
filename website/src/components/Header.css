@@ -1,0 +1,52 @@
+div.header p, div.header svg {
+    color: rgb(from var(--off) r g b / .5);
+}
+
+div.header div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    align-items: center;
+}
+
+div.header h2 {
+    color: var(--primary);
+    font-size: 2rem;
+    font-weight: 400;
+}
+
+div.header p {
+    font-size: 1rem;
+}
+
+div.header button {
+    background: none;
+    border: none;
+}
+
+div.header button:hover {
+    cursor: pointer;
+}
+
+div.header button:active {
+    cursor: initial;
+}
+
+div.header svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+div.header svg path {
+    transition: all .2s;
+}
+
+div.header svg:hover path {
+    color: var(--off);
+    fill-opacity: .5;
+}
+
+div.header svg:active path {
+    color: var(--off);
+    fill-opacity: 1;
+}
