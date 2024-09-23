@@ -126,6 +126,7 @@ export interface Dashboard {
 }
 
 export interface TestRunFile {
+	id: string,
 	name: string,
 	duration: number,
 	status: RunStatus,
@@ -152,4 +153,11 @@ export interface TestMetadata {
     duration: number,
     status: RunStatus,
 	assets: TestAsset[], 
+}
+
+export interface PaginatedTestMetadata {
+	metadata: TestMetadata[],
+	offset: number,
+	n: number,
+	total: number,
 }

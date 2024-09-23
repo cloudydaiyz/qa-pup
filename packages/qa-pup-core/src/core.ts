@@ -1,5 +1,5 @@
-import { Dashboard, DashboardSchema, LatestTestRunFile, RunType, TestMetadata, TestMetadataSchema, TestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
-import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult } from "mongodb";
+import { Dashboard, DashboardSchema, LatestTestRunFile, PaginatedTestMetadata, RunType, TestMetadata, TestMetadataSchema, TestRunFile, TestRunFileSchema } from "@cloudydaiyz/qa-pup-types";
+import { Collection, MongoClient, ObjectId, UpdateFilter, UpdateResult, WithId } from "mongodb";
 import { DB_NAME, FULL_DAY, FULL_HOUR, MAX_DAILY_MANUAL_TESTS, MONGODB_PASS, MONGODB_URI, MONGODB_USER, RAW_TEST_LIFETIME, SENDER_EMAIL } from "./constants";
 import cronParser from "aws-cron-parser";
 import assert from "assert";
@@ -64,32 +64,48 @@ export class PupCore {
     }
     
     // Obtains the info for a specific test run
-    public async readLatestTestInfo(runId: string, name: string): Promise<TestRunFileSchema | null> {
+    public async readTestInfo(runId: string, name: string): Promise<WithId<TestRunFileSchema> | null> {
         const testInfo = await this.testRunColl.findOne(
             { docType: "TEST_RUN_FILE", runId, name },
-            { projection: { _id: 0 } }
-        ) as TestRunFileSchema | null;
+        ) as WithId<TestRunFileSchema> | null;
         return testInfo;
     }
 
-    public async readPublicLatestTestInfo(runId: string, name: string): Promise<TestRunFile | null> {
-        const testInfo = await this.readLatestTestInfo(runId, name);
+    public async readPublicTestInfo(runId: string, name: string): Promise<TestRunFile | null> {
+        const testInfo = await this.readTestInfo(runId, name);
         if(!testInfo) return null;
-
+        
         const publicTests: TestMetadata[] = [];
         for(const test of testInfo.tests) {
-            publicTests.push({
-                ...test,
-                startTime: test.startTime.toJSON(),
-            });
+            publicTests.push({ ...test, startTime: test.startTime.toJSON() });
         }
     
+        const { _id, ...testInfoWithoutId } = testInfo;
         const publicTestInfo: TestRunFile = {
-            ...testInfo,
+            ...testInfoWithoutId,
+            id: testInfo._id.toHexString(),
             tests: publicTests,
             startTime: testInfo.startTime.toJSON(),
         };
         return publicTestInfo;
+    }
+
+    public async readPublicTestMetadata(testRunFileId: string, offset: number,
+        n: number): Promise<PaginatedTestMetadata> {
+        const rawMetadata = await this.testMetadataColl.find(
+            { testRunFileId },
+            { projection: { _id: 0 } }
+        )
+            .sort({ testName: 1 })
+            .toArray() as TestMetadataSchema[];
+
+        const metadata = rawMetadata
+            .slice(offset, offset + n)
+            .map(test => {
+                return { ...test, startTime: test.startTime.toJSON() }
+            }) as TestMetadata[];
+        
+        return { metadata, offset, n, total: rawMetadata.length };
     }
     
     // Triggers a scheduled or manual test run with the optionally specified email on the email list
@@ -189,8 +205,8 @@ export class PupCore {
                 }, 
                 { $push: { "nextScheduledRun.emailList": email } }
             );
-            errorMsg = "Unable to add email to the email list; \
-                    email may already be on the list, or the list is full.";
+            errorMsg = "Unable to add email to the email list; "
+                    + "email may already be on the list, or the list is full.";
         }
 
         assert(update.acknowledged, "Update not acknowledged");
@@ -236,18 +252,13 @@ export class PupService extends PupCore {
             && updateDashboard.modifiedCount == 1, "Unable to update dashboard");
         
         // Send test completion emails
-        console.log("Checking to send test completion emails");
-        let emailList = dashboard.currentRun.emailList;
-        if(emailList.indexOf(SENDER_EMAIL) == -1) emailList = emailList.concat(SENDER_EMAIL);
-        if(dashboard.currentRun.emailList!.length > 0) {
-            console.log("Sending test completion emails");
-            await import("./cloud").then(cloud => cloud.sendTestCompletionEmails(
-                emailList, 
-                dashboard.nextScheduledRun.emailList,
-                runId, 
-                latestTestRunFiles, 
-            ));
-        }
+        console.log("Sending test completion emails");
+        await import("./cloud").then(cloud => cloud.sendTestCompletionEmails(
+            dashboard.currentRun.emailList, 
+            dashboard.nextScheduledRun.emailList,
+            runId, 
+            latestTestRunFiles, 
+        ));
     }
     
     // Handles the cleanup of old tests and manual run refreshes
@@ -286,7 +297,7 @@ export class PupService extends PupCore {
 
     // Adds information from one file's test run into the database
     public async addTestRunFile(file: TestRunFileSchema): Promise<void> {
-        const metadata = file.tests;
+        const metadata = file.tests.sort((a, b) => a.testName.localeCompare(b.testName));
 
         // Limit the number of tests stored in the document
         file.tests = file.tests.slice(0, 10); 

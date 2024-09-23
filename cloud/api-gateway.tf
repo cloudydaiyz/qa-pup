@@ -37,19 +37,35 @@ resource "aws_apigatewayv2_integration" "get_dashboard_path" {
   payload_format_version = "1.0"
 }
 
-resource "aws_apigatewayv2_route" "get_latest_test_run" {
+resource "aws_apigatewayv2_route" "get_test_run" {
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "GET /latest-test/{runId}/{name}"
+  route_key = "GET /run/{runId}/{name}"
 
-  target = "integrations/${aws_apigatewayv2_integration.get_latest_test_run.id}"
+  target = "integrations/${aws_apigatewayv2_integration.get_test_run.id}"
 }
 
-resource "aws_apigatewayv2_integration" "get_latest_test_run" {
+resource "aws_apigatewayv2_integration" "get_test_run" {
   api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "AWS_PROXY"
   integration_method     = "POST"
   integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "GET /latest-test/{runId}/{name}"
+  description            = "GET /run/{runId}/{name}"
+  payload_format_version = "1.0"
+}
+
+resource "aws_apigatewayv2_route" "get_test_run_metadata" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "GET /run/{runFileId}/metadata"
+
+  target = "integrations/${aws_apigatewayv2_integration.get_test_run_metadata.id}"
+}
+
+resource "aws_apigatewayv2_integration" "get_test_run_metadata" {
+  api_id                 = aws_apigatewayv2_api.http_api.id
+  integration_type       = "AWS_PROXY"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.api.invoke_arn
+  description            = "GET /run/{runFileId}/metadata"
   payload_format_version = "1.0"
 }
 

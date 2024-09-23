@@ -100,7 +100,7 @@ if [ $CONTAINER -eq 1 ]; then
     cd $CONTAINER_DIR
     [ $CORE = 1 ] && update_core
     [ $TYPES = 1 ] && update_types
-    scripts/start.sh
+    `${DIR}/update-container.sh`
 fi
 
 if [ $FUNCTIONS -eq 1 ]; then
@@ -113,5 +113,5 @@ fi
 if [ $TERRAFORM -eq 1 ]; then
     echo "Updating terraform config..."
     cd $TERRAFORM_DIR
-    scripts/apply.sh
+    `${DIR}/apply.sh`
 fi

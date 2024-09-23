@@ -51,6 +51,7 @@ export async function sendTestCompletionEmails(
     console.log("Filtered email list: " + emailList);
 
     // Send the templated email
+    if(!emailList.includes(SENDER_EMAIL)) emailList.concat(SENDER_EMAIL);
     const htmlData = await import("./email").then(m => m.composeEmailBody(runId, latestTestRunFiles));
     const sendEmail = new SendEmailCommand({
         Source: SENDER_EMAIL,

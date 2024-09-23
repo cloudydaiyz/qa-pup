@@ -16,7 +16,8 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     let body = JSON.stringify({ message: "Operation successful" });
     try {
         const dashboardPath = path == "/dashboard";
-        const latestTestPath = path == "/latest-test/{runId}/{name}";
+        const latestTestPath = path == "/run/{runId}/{name}";
+        const testMetadataPath = path == "/run/{runFileId}/metadata";
         const manualRunPath = path == "/manual-run";
         const addEmailPath = path == "/add-email";
         const checkEmail = path == "/check-email";
@@ -28,11 +29,21 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
             body = JSON.stringify(dashboard);
         } else if(latestTestPath && method == "GET") {
 
-            const testInfo = await pupCore.readPublicLatestTestInfo(
+            const testInfo = await pupCore.readPublicTestInfo(
                 event.pathParameters!.runId as string, 
                 event.pathParameters!.name as string
             );
             body = JSON.stringify(testInfo);
+        } else if(testMetadataPath && method == "GET") {
+            const offset = Number(event.queryStringParameters?.offset);
+            const n = Number(event.queryStringParameters?.n);
+
+            const metadata = await pupCore.readPublicTestMetadata(
+                event.pathParameters!.runFileId as string, 
+                Number.isNaN(offset) ? 0 : offset,
+                Number.isNaN(n) ? 10 : n,
+            );
+            body = JSON.stringify(metadata);
         } else if(manualRunPath && method == "POST") {
 
             let email = undefined;

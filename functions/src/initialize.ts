@@ -19,7 +19,8 @@ export const handler = async (): Promise<LambdaDefaultReturn> => {
 
         // Initialize database index (helps with finding dashboard vs test files)
         await pupCore.testRunColl.createIndex({ docType: 1, runId: 1, name: 1 });
-        await pupCore.testMetadataColl.createIndex({ testRunFileId: 1, testName: 1 });
+        await pupCore.testMetadataColl.createIndex({ testRunFileId: 1 });
+        // await pupCore.testMetadataColl.createIndex({ testName: 1 });
 
         // Initialize Database singleton element in database
         await pupCore.testRunColl.updateOne(

@@ -67,6 +67,7 @@ async function cleanup() {
     const putIndex = new PutObjectCommand({
         Bucket: TEST_OUTPUT_BUCKET,
         Key: `${RUN_ID}/${TEST_FILE_ID}/index.html`,
+        ContentType: "text/html",
         Body: index
     });
     const response1 = await client.send(putIndex);
@@ -75,6 +76,7 @@ async function cleanup() {
     const putTestResults = new PutObjectCommand({
         Bucket: TEST_OUTPUT_BUCKET,
         Key: `${RUN_ID}/${TEST_FILE_ID}/test-results.json`,
+        ContentType: "application/json",
         Body: testResults,
     });
     const response2 = await client.send(putTestResults);
