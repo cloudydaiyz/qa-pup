@@ -1,7 +1,11 @@
 import Refresh from "./svg/Refresh";
 import "./Header.css";
 
-export default function Header() {
+interface HeaderProps {
+    title: string;
+}
+
+export default function Header({ title }: HeaderProps) {
     return (
         <div className="header">
             <div>
@@ -10,7 +14,7 @@ export default function Header() {
                     <Refresh />
                 </button>
             </div>
-            <h2>Content at a glance</h2>
+            <h2>{title}</h2>
         </div>
     )
 }

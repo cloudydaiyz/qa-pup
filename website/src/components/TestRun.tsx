@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Download from "./svg/Download";
 import EditorControls from "./svg/EditorControls";
 import VisitArrow from "./svg/VisitArrow";
@@ -115,20 +116,22 @@ const Assets = () => {
 }
 
 const TestRun = () => {
-  return (
+    const [selectedTab, setSelectedTab] = useState(0);
+    
+    return (
     <div className="testRunData">
         <ul>
-            <li><button disabled={false}>Overview</button></li>
-            <li><button disabled={true}>Code</button></li>
-            <li><button disabled={false}>Assets</button></li>
+            <li><button disabled={selectedTab == 0} onClick={() => setSelectedTab(0)}>Overview</button></li>
+            <li><button disabled={selectedTab == 1} onClick={() => setSelectedTab(1)}>Code</button></li>
+            <li><button disabled={selectedTab == 2} onClick={() => setSelectedTab(2)}>Assets</button></li>
         </ul>
         <div className="data">
-            {/* <Overview /> */}
-            <Code />
-            {/* <Assets /> */}
+            {selectedTab == 0 && <Overview />}
+            {selectedTab == 1 && <Code />}
+            {selectedTab == 2 && <Assets />}
         </div>
     </div>
-  );
+    );
 }
 
 export default TestRun
