@@ -17,18 +17,6 @@ ul {
     padding: 0;
 }
 
-li {
-    transition: all .2s;
-}
-
-li:hover {
-    background-color: rgb(from var(--primary) r g b / .25);
-}
-
-li:hover button {
-    color: var(--primary);
-}
-
 li button {
     background: none;
     border: none;
@@ -41,9 +29,12 @@ li button {
     padding: 16px 0;
     padding-left: 2rem;
     text-align: left;
+    transition: all .2s;
 }
 
 li button:enabled:hover {
+    background-color: rgb(from var(--primary) r g b / .25);
+    color: var(--primary);
     cursor: pointer;
 }
 

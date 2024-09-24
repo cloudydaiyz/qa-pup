@@ -1,18 +1,22 @@
 import SubmitArrow from "./svg/SubmitArrow";
 import pups from "./../assets/pups.png";
 import "./Dashboard.css";
-import bark from "./../assets/puppy-bark.mp3";
+import bark from "./../assets/puppy-bark-2.mp3";
 import howl from "./../assets/wolf-howl.mp3";
 
-let audioPlaying = false;
+let audioPlaying: HTMLAudioElement;
 const barkAudio = new Audio(bark);
 const howlAudio = new Audio(howl);
 
+// const onAudioEnd = () => audioPlaying = false;
+
 const playPup = () => {
-    if (audioPlaying) return;
-    audioPlaying = true;
-    const audio = Math.random() > 0.3 ? barkAudio.play() : howlAudio.play();
-    audio.then(() => audioPlaying = false);
+    if (audioPlaying) {
+        audioPlaying.pause();
+        audioPlaying.load();
+    }
+    audioPlaying = Math.random() > 0.3 ? barkAudio : howlAudio;
+    audioPlaying.play();
 }
 
 const Dashboard = () => {
@@ -67,8 +71,8 @@ const Dashboard = () => {
                         <label htmlFor="nextRunEmailCheck">Email on completion?</label>
                     </span>
                     <div className="emailContainer">
-                        <input type="text" name="" id="nextRunEmail" />
-                        <button className="submit">
+                        <input type="text" name="" id="nextRunEmail" placeholder="Email" disabled={false} />
+                        <button className="submit" disabled={false}>
                             <SubmitArrow />
                         </button>
                     </div>

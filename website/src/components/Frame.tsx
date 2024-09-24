@@ -2,6 +2,7 @@ import Navbar from "./Navbar";
 import Header from "./Header";
 import Dashboard from "./Dashboard";
 import "./Frame.css";
+import TestRun from "./TestRun";
 
 export default function Frame() {
     return (
@@ -13,6 +14,7 @@ export default function Frame() {
                     {/* Header component */}
                     <Header />
                     <Dashboard />
+                    {/* <TestRun /> */}
                 </div>
             </div>
         </>
