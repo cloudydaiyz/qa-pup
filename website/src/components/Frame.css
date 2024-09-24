@@ -12,7 +12,8 @@ div.frame {
 }
 
 div.container {
-    width: 100%;
+    flex-grow: 1;
+    width: 0;
     height: 100%;
     padding: 2rem;
     padding-bottom: 0rem;

@@ -5,7 +5,7 @@
     overflow: hidden;
 }
 
-.testData {
+.test-data {
     flex-basis: 60%;
     display: flex;
     flex-direction: column;
@@ -17,17 +17,17 @@
     padding-bottom: 1rem;
 }
 
-.testData > div {
+.test-data > div {
     background-color: var(--white);
     border-radius: 16px;
     padding: 1rem;
 }
 
-.testData p.light {
+.test-data p.light {
     color: rgb(from var(--black) r g b / .5);
 }
 
-.testData h4 {
+.test-data h4 {
     color: var(--primary);
     font-size: 3rem;
     margin-top: 1.5rem;
@@ -67,31 +67,30 @@
     color: rgb(from var(--black) r g b / .5);
 }
 
-.latestTest {
+.latest-test {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.latestTest .test {
+.latest-test .test {
     display: flex;
     flex-direction: column;
     font-size: 1.25rem;
 }
 
-.latestTest .stats {
+.latest-test .stats {
     display: flex;
     justify-content: space-between;
     font-size: 1rem;
 }
 
-.manualRunsLeft {
+.manual-run-email-check {
     font-size: 1.5rem;
 }
 
-.nextRefresh {
+.next-refresh {
     font-size: 1rem;
-    margin-bottom: 1rem;
 }
 
 .manualRun form {
@@ -99,7 +98,8 @@
     flex-direction: column;
 }
 
-.manualRun form button {
+.manual-run form button {
+    margin-top: 1rem;
     font-size: 1.5rem;
     font-weight: 400;
     font-family: var(--primary-font);
@@ -110,37 +110,38 @@
     border: 0 solid transparent;
     border-radius: 16px;
     transition: all .2s;
+    width: 100%;
 }
 
-.manualRun form button:enabled:hover {
+.manual-run form button:enabled:hover {
     background-color: var(--primary-dark);
     box-shadow: 0 3px 3px rgb(from var(--black) r g b / .5);
     transform: translateY(-3px);
     cursor: pointer;
 }
 
-.manualRun form button:enabled:active {
+.manual-run form button:enabled:active {
     cursor: initial;
 }
 
-.manualRun form button:disabled {
+.manual-run form button:disabled {
     background-color: var(--gray);
     font-weight: 300;
     color: rgb(from var(--black) r g b / .5);
 }
 
-.testData form span input {
+.test-data form span input {
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
-.testData form span label {
+.test-data form span label {
     margin-left: 1rem;
 }
 
 /* https://sentry.io/answers/how-to-style-a-checkbox-using-css/ */
 
-.emailContainer {
+.email-container {
     display: flex;
     justify-content: space-between;
 
@@ -151,11 +152,11 @@
     border-bottom: 2px solid rgb(from var(--black) r g b / .5);
 }
 
-.emailContainer:has(input:enabled) {
+.email-container:has(input:enabled) {
     border-bottom: 2px solid var(--primary);
 }
 
-.emailContainer button.submit {
+.email-container button.submit {
     position: relative;
     background: none;
     border: none;
@@ -163,29 +164,29 @@
     height: 1.5rem;
 }
 
-.emailContainer button.submit:enabled:hover {
+.email-container button.submit:enabled:hover {
     cursor: pointer;
 }
 
-.emailContainer button.submit:enabled:active {
+.email-container button.submit:enabled:active {
     cursor: initial;
 }
 
-.emailContainer button.submit:enabled svg {
+.email-container button.submit:enabled svg {
     width: 100%;
     height: 100%;
 }
 
-.emailContainer button.submit:enabled svg path {
+.email-container button.submit:enabled svg path {
     transition: all .2s;
 }
 
-.emailContainer button.submit:enabled:hover svg path {
+.email-container button.submit:enabled:hover svg path {
     fill: var(--primary);
     fill-opacity: 1;
 }
 
-#manualRunEmail, #nextRunEmail {
+#manual-run-email, #next-run-email, #current-run-email {
     width: 100%;
     font-size: 1rem;
     background: none;
@@ -194,10 +195,16 @@
     font-family: var(--secondary-font);
 }
 
-#manualRunEmail::placeholder, #nextRunEmail::placeholder {
+#manual-run-email::placeholder, 
+#next-run-email::placeholder, 
+#current-run-email::placeholder 
+{
     color: rgb(from var(--black) r g b / .5);
 }
 
-#manualRunEmail:focus-visible, #nextRunEmail:focus-visible {
+#manual-run-email:focus-visible, 
+#next-run-email:focus-visible, 
+#current-run-email::placeholder 
+{
     outline: none;
 }

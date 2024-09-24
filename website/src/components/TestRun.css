@@ -1,4 +1,4 @@
-.testRunData {
+.test-run-data {
     flex-grow: 1;
     margin-bottom: 2rem;
     height: 0;
@@ -7,12 +7,12 @@
     gap: 1.5rem;
 }
 
-.testRunData ul {
+.test-run-data ul {
     display: flex;
     /* border-bottom: 2px solid rgb(from var(--black) r g b / .5); */
 }
 
-.testRunData ul button {
+.test-run-data ul button {
     padding-left: 2rem;
     padding-right: 2rem;
     color: rgb(from var(--black) r g b / .5);
@@ -21,27 +21,26 @@
     border-bottom: 2px solid rgb(from var(--black) r g b / .5);
 }
 
-.testRunData ul button:enabled:hover {
+.test-run-data ul button:enabled:hover {
     border-bottom: 2px solid var(--primary);
 }
 
-.testRunData ul button:disabled {
+.test-run-data ul button:disabled {
     background-color: rgb(from var(--primary) r g b / .5);
     color: var(--primary);
     border-color: var(--primary);
 }
 
-.testRunData .data {
+.test-run-data .data {
     flex-grow: 1;
     flex-shrink: 0;
     padding: 1rem;
     background-color: var(--white);
     border-radius: 16px;
-    overflow: scroll;
 }
 
 .overview {
-    padding-top: 2rem;
+    width: 100%;
 }
 
 .overview h3 {
@@ -54,6 +53,10 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.overview-section.overall {
+    margin-bottom: 3rem;
 }
 
 .overview-section span {
@@ -75,7 +78,11 @@
     color: var(--white);
     display: flex;
     flex-direction: column;
-    overflow: scroll;
+}
+
+.code p, .code code {
+    font-family: var(--tertiary-font);
+    width: fit-content;
 }
 
 .code-header {
@@ -100,6 +107,14 @@
     display: flex;
     flex-grow: 1;
     overflow: scroll;
+    scrollbar-color: var(--white) transparent;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.code-body code {
+    /* overflow: scroll; */
+    padding: 1rem;
 }
 
 .line-numbers {
@@ -113,7 +128,7 @@
     height: fit-content;
 }
 
-.code-content {
+.code-body pre {
     flex-grow: 1;
     text-align: left;
     background-color: var(--editor-color-3);

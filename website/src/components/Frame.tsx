@@ -1,9 +1,9 @@
 import Navbar from "./Navbar";
 import Header from "./Header";
-import Dashboard from "./Dashboard";
-import "./Frame.css";
+import DashboardElement from "./Dashboard";
 import TestRun from "./TestRun";
 import { useState } from "react";
+import "./Frame.css";
 
 export default function Frame() {
     // const [tabs, setTabs] = useState(["sortHackerNewsArticles", "sortHackerNewsArticles2"]);
@@ -13,13 +13,14 @@ export default function Frame() {
     return (
         <>
             <div className="frame">
-                {/* Navbar component */}
                 <Navbar tabs={ tabs } selectedTab={ selectedTab } setTab={ setSelectedTab }  />
                 <div className="container">
-                    {/* Header component */}
                     <Header title={selectedTab == -1 ? "Content at a glance" : tabs[selectedTab]} />
-                    { selectedTab == -1 && <Dashboard />}
-                    { selectedTab != -1 && <TestRun />}
+                    { 
+                        selectedTab == -1 
+                            ? <DashboardElement /> 
+                            : <TestRun />
+                    }
                 </div>
             </div>
         </>
