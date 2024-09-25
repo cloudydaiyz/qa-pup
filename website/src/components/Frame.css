@@ -1,4 +1,4 @@
-div.frame {
+.frame {
     flex-grow: 1;
     background-color: var(--frame);
     box-shadow: 0px 0px 10px rgb(from var(--black) r g b / 0.2);
@@ -11,7 +11,7 @@ div.frame {
     overflow: hidden;
 }
 
-div.container {
+.container {
     flex-grow: 1;
     width: 0;
     height: 100%;
@@ -20,4 +20,71 @@ div.container {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+}
+
+.toast {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    background-color: var(--white);
+    padding: 2rem 4rem;
+    width: 40%;
+    z-index: 10;
+    translate: -50%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px rgb(from var(--black) r g b / 0.2);
+    animation: toast-visible 5s ease-in-out 1 both;
+}
+
+.toast::before {
+    content: "hi";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -2;
+    background-color: var(--primary);
+    color: transparent;
+    width: 90%;
+    height: 4px;
+    animation: toast-anim 4s linear .5s 1 both;
+}
+
+@keyframes toast-visible {
+    0% { transform: translateY(-200%); }
+    10% { transform: translateY(0%); }
+    90% { transform: translateY(0%); }
+    100% { transform: translateY(-200%); }
+}
+
+@keyframes toast-anim {
+    0% { width: 0%; }
+
+    100% { width: 100%; }
+}
+
+.toast button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: none;
+    border: none;
+
+    svg path {
+        fill: rgb(from var(--black) r g b / .5);
+    }
+
+    &:hover {
+        cursor: pointer;
+        svg path {
+            fill: rgb(from var(--black) r g b / .75);
+        }
+    }
+
+    &:active {
+        cursor: initial;
+        svg path {
+            fill: var(--black);
+        }
+    }
 }

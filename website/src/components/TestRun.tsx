@@ -42,12 +42,12 @@ const Overview = ({ overall, metadata }: OverviewProps) => {
         </React.Fragment>
     ));
 
-    const loaded = true;
+    const loading = false;
 
     return (
-        <div className={`overview ${!loaded ? "loading" : ""}`}>
+        <div className={`overview ${loading ? "loading" : ""}`}>
             {
-                loaded && [
+                !loading && [
                     <React.Fragment key={-1}>
                         <h3>OVERALL</h3>
                         <div className="overview-section overall">
@@ -96,10 +96,11 @@ interface CodeProps {
 }
 
 const Code = ({ code }: CodeProps) => {
-    const loaded = true;
+
+    const loading = false;
 
     return (
-        loaded && <div className="code">
+        !loading && <div className="code">
             <div className="code-header">
                 <EditorControls />
                 <p>index-test-ts</p>
@@ -155,10 +156,10 @@ const Assets = ({ htmlReport, jsonReport, assets, testsRan }: AssetsProps) => {
         </span>
     ));
 
-    const loaded = true;
+    const loading = false;
 
     return (
-        loaded && <div className="assets">
+        !loading && <div className="assets">
             <h3>Reporters</h3>
             <div className="asset-section">
                 <span>

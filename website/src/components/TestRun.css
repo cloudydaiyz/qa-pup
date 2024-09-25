@@ -68,7 +68,7 @@
     box-shadow: none;
 }
 
-.overview {
+.overview, .assets {
     width: 100%;
     height: fit-content;
 }
@@ -170,10 +170,6 @@
     padding: 1rem;
     min-height: 100%;
     height: fit-content;
-}
-
-.assets {
-    width: 100%;
 }
 
 .assets h3 {
