@@ -4,193 +4,82 @@ import EditorControls from "./svg/EditorControls";
 import VisitArrow from "./svg/VisitArrow";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { gruvboxDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import "./TestRun.css";
 import React from "react";
+import "./TestRun.css";
 
-const Overview = () => {
+import { TestAsset, TestMetadata, TestRunFile } from "@cloudydaiyz/qa-pup-types";
+import { sampleTestRunFile1, codeSample } from "../samples";
+import Loading from "./Loading";
+
+interface OverviewProps {
+    overall: {
+        startTime: string,
+        duration: number,
+        testsRan: number,
+        testsPassed: number,
+    }
+    metadata: TestMetadata[];
+}
+
+const Overview = ({ overall, metadata }: OverviewProps) => {
+    const tests = metadata.map((test, index) => (
+        <React.Fragment key={index}>
+            <h3>{(test.suiteName ? `${test.suiteName} => ` : "") + test.testName}</h3>
+            <div className="overview-section">
+                <span>
+                    <h4>Start Time</h4>
+                    <p>{(new Date(test.startTime)).toLocaleTimeString()}</p>
+                </span>
+                <span>
+                    <h4>Duration</h4>
+                    <p>{(Math.round(test.duration) / 1000) + "s"}</p>
+                </span>
+                <span>
+                    <h4>Status</h4>
+                    <p>{test.status}</p>
+                </span>
+            </div>
+        </React.Fragment>
+    ));
+
+    const loaded = true;
+
     return (
-        <div className="overview">
-            <h3>OVERALL</h3>
-            <div className="overview-section overall">
-                <span>
-                    <h4>Start Time</h4>
-                    <p>Lorem ipsum lorem ipsum lorem ipsum</p>
-                </span>
-                <span>
-                    <h4>Duration</h4>
-                    <p>Lorem ipsum lorem ipsum lorem ipsum</p>
-                </span>
-                <span>
-                    <h4>Tests Ran</h4>
-                    <p>Lorem ipsum lorem ipsum lorem ipsum</p>
-                </span>
-                <span>
-                    <h4>Tests Passed</h4>
-                    <p>Lorem ipsum lorem ipsum lorem ipsum</p>
-                </span>
-            </div>
-            <h3>sortHackerNewsArticles : sortHackerNewsArticles method 1</h3>
-            <div className="overview-section">
-                <span>
-                    <h4>Start Time</h4>
-                    <p>Time o clock</p>
-                </span>
-                <span>
-                    <h4>Duration</h4>
-                    <p>100ms</p>
-                </span>
-                <span>
-                    <h4>Status</h4>
-                    <p>PASSED</p>
-                </span>
-            </div>
-            <h3>sortHackerNewsArticles : sortHackerNewsArticles method 2</h3>
-            <div className="overview-section">
-                <span>
-                    <h4>Start Time</h4>
-                    <p>Time o clock</p>
-                </span>
-                <span>
-                    <h4>Duration</h4>
-                    <p>100ms</p>
-                </span>
-                <span>
-                    <h4>Status</h4>
-                    <p>PASSED</p>
-                </span>
-            </div>
+        <div className={`overview ${!loaded ? "loading" : ""}`}>
+            {
+                loaded && [
+                    <React.Fragment key={-1}>
+                        <h3>OVERALL</h3>
+                        <div className="overview-section overall">
+                            <span>
+                                <h4>Start Time</h4>
+                                <p>{(new Date(overall.startTime)).toString()}</p>
+                            </span>
+                            <span>
+                                <h4>Duration</h4>
+                                <p>{(Math.round(overall.duration) / 1000) + "s"}</p>
+                            </span>
+                            <span>
+                                <h4>Tests Ran</h4>
+                                <p>{overall.testsRan}</p>
+                            </span>
+                            <span>
+                                <h4>Tests Passed</h4>
+                                <p>{overall.testsPassed}</p>
+                            </span>
+                        </div>
+                    </React.Fragment>,
+                    tests,
+                    overall.testsRan != metadata.length 
+                        && <button key={-2} className="view-more">View More</button> 
+                ] || 
+                <div className="loading-container type-2">
+                    <Loading />
+                </div> 
+            }
         </div>
     );
 }
-
-const codeSample = 
-`const { chromium, Locator } = require("playwright");
-const { expect } = require("@playwright/test");
-const { NUM_ARTICLES, TEST_DELAY, TEST_RUNS } = require("./config.js");
-
-/**
- * Validates that EXACTLY the first \`NUM_ARTICLES\` articles on Hacker News 
- * are sorted from newest to oldest.
- *
- * Performs analysis as new pages are being found.
- */
-async function sortHackerNewsArticles(timing) {
-    let timeStart = 0;
-    let timeEnd = 0;
-    console.log("sortHackerNewsArticles start");
-
-    // Launch browser
-    const browser = await chromium.launch({ 
-        headless: false, 
-        args: ['--disable-gpu'],
-    });
-    const context = await browser.newContext({
-        baseURL: "https://news.ycombinator.com",
-        timeout: 60000,
-    });
-    if (timing) timeStart = Date.now();
-
-    try {
-        // Store the promises for analyzing each page
-        const analysis = [];
-
-        let numArticles = 0;
-        let nextPage = await context.newPage();
-        await nextPage.goto("newest");
-
-        console.log("starting loop");
-
-        while (numArticles < NUM_ARTICLES) {
-            nextPage.on('console', msg => {
-                console.log("\u001b[31mCONSOLE\u001b[0m");
-                console.log(msg.text())
-            });
-            nextPage.on('requestfailed', request => {
-                console.log("\u001b[33mREQUEST FAILED\u001b[0m");
-                console.log(\`Request failed: \${request.url()}\`);
-            });
-              
-            await nextPage.waitForLoadState('networkidle');
-
-            // Calculate the number of articles to analyze on this page
-            const numNewArticles = Math.min(30, NUM_ARTICLES - numArticles);
-            numArticles += numNewArticles;
-
-            // Analyze the page asynchronously
-            const table = await nextPage.getByRole("table").nth(2);
-            const rows = await table.locator("tbody > tr").all();
-            analysis.push(analyzeHackerNewsPage(rows, numNewArticles));
-
-            // Get the next page if there's still articles left
-            if (numArticles < NUM_ARTICLES) {
-                await delay(1500);
-                const nextPageLink = await (
-                    await rows[rows.length - 1].getByRole("link")
-                ).getAttribute("href");
-                nextPage = await context.newPage();
-                await nextPage.goto(nextPageLink);
-            }
-        }
-
-        // Ensure that the results for each successive page are in order
-        const results = await Promise.all(analysis);
-        results.forEach((result, i) => {
-            if (i < result.length - 1) {
-                expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);
-            }
-        });
-
-        if (timing) timeEnd = Date.now();
-        console.log(
-            "The first " + NUM_ARTICLES + " newest articles are sorted from newest to oldest!"
-        );
-    } catch(e) {
-        if (timing) timeEnd = Date.now();
-        console.error(
-            "The first " + NUM_ARTICLES + " newest articles are NOT sorted from newest to oldest."
-        );
-        console.error("Error:");
-        console.error(e);
-    }
-
-    browser.close();
-    return timeEnd - timeStart;
-}
-
-/**
- * Validates that \`numArticles\` articles on a single page of Hacker News/newest
- * is sorted
- * @param {Locator[]} rows The table rows on the page to analyze
- * @param {number} numArticles The number of articles to analyze
- * @returns The minutes of the first article and last article on the page
- */
-async function analyzeHackerNewsPage(rows, numArticles) {
-    let previousTimestamp = 0;
-    const timeData = {};
-
-    for (let i = 0; i < numArticles; i++) {
-        const metadata = rows[i * 3 + 1];
-
-        // Select the metadata
-        const links = await metadata.locator("span:has(a)").all();
-        if (links.length > 1) {
-            const time = await links[1].getAttribute("title");
-            const timestamp = Date.parse(time);
-
-            if (previousTimestamp) {
-                // Ensure this article's timestamp is before the previous one
-                expect(timestamp).toBeLessThanOrEqual(previousTimestamp);
-            }
-            previousTimestamp = timestamp;
-
-            if (!timeData.first) timeData.first = timestamp;
-            timeData.last = timestamp;
-        }
-    }
-
-    return timeData;
-}
-`
 
 function getLineNumbers(sample: string) {
     const numLines = sample != "" ? sample.split(/\n/).length - 1 : 0;
@@ -202,16 +91,22 @@ function getLineNumbers(sample: string) {
     return lines;
 }
 
-const Code = () => {
+interface CodeProps {
+    code: string;
+}
+
+const Code = ({ code }: CodeProps) => {
+    const loaded = true;
+
     return (
-        <div className="code">
+        loaded && <div className="code">
             <div className="code-header">
                 <EditorControls />
                 <p>index-test-ts</p>
             </div>
             <div className="code-body">
                 <div className="line-numbers">
-                    {getLineNumbers(codeSample)}
+                    {getLineNumbers(code)}
                 </div>
                 <SyntaxHighlighter 
                     language="typescript" 
@@ -230,53 +125,72 @@ const Code = () => {
                     }
                     wrapLines={true}
                 >
-                    {codeSample}
+                    {code}
                 </SyntaxHighlighter>
             </div>
+        </div>
+        || <div className="loading-container type-2">
+            <Loading />
         </div>
     );
 }
 
-const Assets = () => {
+interface AssetsProps {
+    htmlReport: string;
+    jsonReport: string;
+    assets: TestAsset[];
+    testsRan: number;
+}
+
+const Assets = ({ htmlReport, jsonReport, assets, testsRan }: AssetsProps) => {
+
+    const assetElements = assets.map((asset, index) => (
+        <span key={index}>
+            <p>{asset.name}</p>
+            <button>
+                <a target="_blank" download={asset.name} href={asset.objectUrl}>
+                    <Download />
+                </a>
+            </button>
+        </span>
+    ));
+
+    const loaded = true;
+
     return (
-        <div className="assets">
+        loaded && <div className="assets">
             <h3>Reporters</h3>
             <div className="asset-section">
                 <span>
                     <p>HTML Report</p>
-                    <button><VisitArrow /></button>
+                    <button><a target="_blank" href={htmlReport}><VisitArrow /></a></button>
                 </span>
                 <span>
                     <p>JSON Report</p>
-                    <button><Download /></button>
+                    <button>
+                        <a target="_blank" download={"test-results.json"} href={jsonReport}>
+                            <Download />
+                        </a>
+                    </button>
                 </span>
             </div>
             <h3>Other</h3>
             <div className="asset-section">
-                <span>
-                    <p>vid1</p>
-                    <button><Download /></button>
-                </span>
-                <span>
-                    <p>vid2</p>
-                    <button><Download /></button>
-                </span>
-                <span>
-                    <p>vid3</p>
-                    <button><Download /></button>
-                </span>
-                <span>
-                    <p>vid4</p>
-                    <button><Download /></button>
-                </span>
+                {assetElements}
             </div>
+            { assets.length != testsRan && <button className="view-more">View More</button> }
+        </div>
+        || <div className="loading-container type-2">
+            <Loading />
         </div>
     );
 }
 
-interface TestRunProps {}
+interface TestRunProps {
+    testRunFile: TestRunFile;
+}
 
-const TestRun = ({}: TestRunProps) => {
+const TestRun = ({ testRunFile }: TestRunProps) => {
     const [selectedTab, setSelectedTab] = useState(0);
     
     return (
@@ -287,9 +201,22 @@ const TestRun = ({}: TestRunProps) => {
             <li><button disabled={selectedTab == 2} onClick={() => setSelectedTab(2)}>Assets</button></li>
         </ul>
         <div className="data">
-            {selectedTab == 0 && <Overview />}
-            {selectedTab == 1 && <Code />}
-            {selectedTab == 2 && <Assets />}
+            {selectedTab == 0 && <Overview
+                overall={{
+                    startTime: testRunFile.startTime,
+                    duration: testRunFile.duration,
+                    testsRan: testRunFile.testsRan,
+                    testsPassed: testRunFile.testsPassed,
+                }}
+                metadata={testRunFile.tests}
+            />}
+            {selectedTab == 1 && <Code code={codeSample} />}
+            {selectedTab == 2 && <Assets 
+                htmlReport={testRunFile.reporters.htmlStaticUrl}
+                jsonReport={testRunFile.reporters.jsonObjectUrl}
+                assets={testRunFile.tests.map(test => test.assets).flat()}
+                testsRan={testRunFile.testsRan}
+            />}
         </div>
     </div>
     );

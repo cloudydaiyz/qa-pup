@@ -26,10 +26,10 @@ li button {
     color: var(--black);
     height: 100%;
     width: 100%;
-    padding: 16px 0;
-    padding-left: 2rem;
+    padding: 16px 2rem;
     text-align: left;
     transition: all .2s;
+    text-overflow: ellipsis;
 }
 
 li button:enabled:hover {

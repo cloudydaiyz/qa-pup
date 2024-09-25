@@ -44,15 +44,6 @@ export interface TestSpecs { // usually one for each project and test
     }[];
 }
 
-// Useful for the frontend
-async function readDataFromBucket() {
-    fetch(`https://${TEST_OUTPUT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/qa-pup-example.spec.ts`)
-        .then(res => res.text())
-        .then(txt => console.log(txt));
-    
-    // use <a download="filename" href="s3link"> for downloading
-}
-
 // Put reporters and test assets into S3 bucket, and update the MongoDB database
 // NOTE: Come back to this and update with better async/await usage
 async function cleanup() {

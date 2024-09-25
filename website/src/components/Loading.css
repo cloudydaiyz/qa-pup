@@ -1,0 +1,42 @@
+.loading svg {
+    animation: rotate-oval .5s linear infinite;
+}
+
+.loading svg path {
+    fill: var(--primary);
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    height: 80%;
+}
+
+.loading h3 {
+    color: var(--primary);
+}
+
+.loading-container {
+    display: flex;
+    place-items: center;
+    width: 100%;
+    height: 50%;
+    margin-bottom: 2rem;
+}
+
+.loading-container.type-2 {
+    height: 100%;
+}
+
+@keyframes rotate-oval {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

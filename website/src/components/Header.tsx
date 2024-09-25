@@ -1,18 +1,26 @@
 import Refresh from "./svg/Refresh";
 import "./Header.css";
+import { useState } from "react";
 
 interface HeaderProps {
     title: string;
 }
 
 export default function Header({ title }: HeaderProps) {
+    const [time, setTime] = useState(new Date().toString());
+
     return (
         <div className="header">
             <div>
-                <p>Last Updated: Time o Clock</p>
-                <button>
-                    <Refresh />
-                </button>
+                <p>Last Updated: {time}</p>
+                {
+                    title == "Content at a glance" && 
+                    <button
+                        onClick={() => setTime(new Date().toString())}
+                    >
+                        <Refresh />
+                    </button>
+                }
             </div>
             <h2>{title}</h2>
         </div>

@@ -93,12 +93,13 @@
     font-size: 1rem;
 }
 
-.manualRun form {
+.manual-run form {
     display: flex;
     flex-direction: column;
+    margin-bottom: 1rem;
 }
 
-.manual-run form button {
+.manual-run form button, .user-email button {
     margin-top: 1rem;
     font-size: 1.5rem;
     font-weight: 400;
@@ -113,30 +114,50 @@
     width: 100%;
 }
 
-.manual-run form button:enabled:hover {
+.manual-run form button:enabled:hover, 
+.user-email button:enabled:hover 
+{
     background-color: var(--primary-dark);
     box-shadow: 0 3px 3px rgb(from var(--black) r g b / .5);
     transform: translateY(-3px);
     cursor: pointer;
 }
 
-.manual-run form button:enabled:active {
+.manual-run form button:enabled:active, 
+.user-email button:enabled:active 
+{
     cursor: initial;
+    transform: translateY(0);
+    box-shadow: none;
 }
 
-.manual-run form button:disabled {
+.manual-run form button:disabled, 
+.user-email button:disabled 
+{
     background-color: var(--gray);
     font-weight: 300;
     color: rgb(from var(--black) r g b / .5);
 }
 
+.user-email p.light {
+    margin-top: 1rem;
+}
+
 .test-data form span input {
     margin-top: 1rem;
-    margin-bottom: 1rem;
 }
 
 .test-data form span label {
     margin-left: 1rem;
+    line-height: 1rem;
+}
+
+.user-email legend {
+    margin-top: 8px;
+}
+
+.test-data .user-email form span input {
+    margin-top: 1rem;
 }
 
 /* https://sentry.io/answers/how-to-style-a-checkbox-using-css/ */
@@ -150,6 +171,7 @@
     background-color: var(--gray);
     border-radius: 4px;
     border-bottom: 2px solid rgb(from var(--black) r g b / .5);
+    margin-top: 1rem;
 }
 
 .email-container:has(input:enabled) {
@@ -186,7 +208,11 @@
     fill-opacity: 1;
 }
 
-#manual-run-email, #next-run-email, #current-run-email {
+#manual-run-email, 
+#next-run-email, 
+#current-run-email, 
+#user-email
+{
     width: 100%;
     font-size: 1rem;
     background: none;
@@ -197,14 +223,16 @@
 
 #manual-run-email::placeholder, 
 #next-run-email::placeholder, 
-#current-run-email::placeholder 
+#current-run-email::placeholder, 
+#user-email::placeholder 
 {
     color: rgb(from var(--black) r g b / .5);
 }
 
 #manual-run-email:focus-visible, 
 #next-run-email:focus-visible, 
-#current-run-email::placeholder 
+#current-run-email:focus-visible, 
+#user-email:focus-visible 
 {
     outline: none;
 }

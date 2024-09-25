@@ -5,61 +5,12 @@ import howl from "./../assets/wolf-howl.mp3";
 import { useState } from "react";
 import "./Dashboard.css";
 
+import { sampleDashboard2 } from "../samples";
 import { Dashboard } from "@cloudydaiyz/qa-pup-types";
 
 const barkAudio = new Audio(bark);
 const howlAudio = new Audio(howl);
 let audioPlaying: HTMLAudioElement;
-
-const sampleDashboard1: Dashboard = {
-    runId: "N/A",
-    runType: "MANUAL",
-    startTime: "2024-09-24T13:00:37.051Z",
-    latestTests: [],
-    manualRun: {
-        remaining: 1,
-        max: 3,
-        nextRefresh: "2024-09-25T13:00:00.000Z"
-    },
-    nextScheduledRun: {
-        startTime: "2024-09-25T13:00:00.000Z"
-    },
-    currentRun: {
-        state: "AT REST",
-    }
-}
-
-const sampleDashboard2: Dashboard = {
-    runId: "N/A",
-    runType: "MANUAL",
-    startTime: "2024-09-24T13:00:37.051Z",
-    latestTests: [
-        {
-            name: "sortHackerNewsArticles",
-            duration: 800,
-            status: "PASSED"
-        },
-        {
-            name: "sortHackerNewsArticles2",
-            duration: 800,
-            status: "FAILED"
-        }
-    ],
-    manualRun: {
-        remaining: 2,
-        max: 3,
-        nextRefresh: "2024-09-25T13:00:00.000Z"
-    },
-    nextScheduledRun: {
-        startTime: "2024-09-25T13:00:00.000Z"
-    },
-    currentRun: {
-        state: "RUNNING",
-        runType: "MANUAL",
-        runId: "66f2b7f569128ede5ec00d6a",
-        startTime: "2024-09-24T13:00:37.051Z",
-    }
-}
 
 function playPup () {
     if (audioPlaying) {
@@ -88,13 +39,15 @@ function getDurationString(duration: number) {
     return duration + durationString;
 }
 
-interface DashboardProps { }
+interface DashboardProps { 
+    dashboard: Dashboard
+}
 
-const DashboardElement = ({ }: DashboardProps) => {
+const DashboardElement = ({ dashboard }: DashboardProps) => {
     const [ useManualRunEmail, setUseManualRunEmail ] = useState(false);
     const [ useScheduledRunEmail, setUseScheduledRunEmail ] = useState(false);
     const [ useCurrentRunEmail, setUseCurrentRunEmail ] = useState(false);
-    const [ dashboard, setDashboard ] = useState<Dashboard>(sampleDashboard1);
+    const [ initiateEmailAction, setInitiateEmailAction ] = useState<"check"|"verify"|null>(null);
 
     let tests = dashboard.latestTests.map((test, index) => (
         <div className="test" key={index}>
@@ -106,7 +59,13 @@ const DashboardElement = ({ }: DashboardProps) => {
         </div>
     ));
     tests = tests.length > 0 ? tests 
-        : [<p key={0}>System recently refreshed; no tests have been run yet.</p>];
+        : [<p key={0}>System recently refreshed; no tests have been ran yet.</p>];
+
+    // Check if manual run can be triggered
+    const withinHourOfScheduledRun = new Date(dashboard.nextScheduledRun.startTime).getTime() - Date.now() < 3600000;
+    const cannotTriggerManualRun = dashboard.manualRun.remaining == 0
+        || dashboard.currentRun.state == "RUNNING"
+        || withinHourOfScheduledRun;
 
     return (
         <div className="dashboard">
@@ -145,7 +104,11 @@ const DashboardElement = ({ }: DashboardProps) => {
                                         placeholder="Email" 
                                         disabled={!useCurrentRunEmail} 
                                     />
-                                    <button className="submit" disabled={!useCurrentRunEmail}>
+                                    <button 
+                                        className="submit" 
+                                        disabled={!useCurrentRunEmail}
+                                        onClick={(e) => e.preventDefault()}
+                                    >
                                         <SubmitArrow />
                                     </button>
                                 </div>
@@ -155,7 +118,52 @@ const DashboardElement = ({ }: DashboardProps) => {
                             <p>No tests are currently running.</p>
                         </>)
                     }
-                    
+                </div>
+                <div className="user-email">
+                    <h3>Email Verification</h3>
+                    <p>In order to get notified on test completion from a manual or scheduled run, you must have a verified email.</p>
+                    <form>
+                        <legend>Select which action you want to take:</legend>
+                        <span>
+                            <input 
+                                type="radio" 
+                                name="email-action" 
+                                id="check-email" 
+                                value="check" 
+                                onInput={(e) => (e.currentTarget.checked && setInitiateEmailAction("check"))}
+                            />
+                            <label htmlFor="check-email">Check email verification status</label><br/>
+                        </span>
+                        <span>
+                            <input 
+                                type="radio" 
+                                name="email-action" 
+                                id="verify-email" 
+                                value="verify" 
+                                onInput={(e) => (e.currentTarget.checked && setInitiateEmailAction("verify"))}
+                            />
+                            <label htmlFor="check-email">Verify email</label><br/>
+                        </span>
+                        <div className="email-container">
+                            <input 
+                                type="email" 
+                                name="user-email" 
+                                id="user-email" 
+                                placeholder="Email" 
+                                disabled={!initiateEmailAction}
+                            />
+                        </div>
+                        <button 
+                            onClick={(e) => e.preventDefault()}
+                            disabled={!initiateEmailAction}
+                        >
+                            SUBMIT
+                        </button>
+                    </form>
+                    {
+                        initiateEmailAction == "verify"
+                            && <p className="light">NOTE: The verification email will be from <strong>no-reply-aws@amazon.com.</strong></p>
+                    }
                 </div>
                 <div className="manual-run">
                     <h3>Manual Run</h3>
@@ -173,10 +181,7 @@ const DashboardElement = ({ }: DashboardProps) => {
                                 type="checkbox" 
                                 name="manual-run-email-check" 
                                 id="manual-run-email-check" 
-                                disabled={
-                                    dashboard.manualRun.remaining == 0 || 
-                                    dashboard.currentRun.state == "RUNNING"
-                                }
+                                disabled={cannotTriggerManualRun}
                                 onInput={(e) => {
                                     setUseManualRunEmail(e.currentTarget.checked);
                                 }}
@@ -193,14 +198,20 @@ const DashboardElement = ({ }: DashboardProps) => {
                             />
                         </div>
                         <button 
-                            disabled={
-                                dashboard.manualRun.remaining == 0 || 
-                                dashboard.currentRun.state == "RUNNING"
-                            }
+                            disabled={cannotTriggerManualRun}
+                            onClick={(e) => e.preventDefault()}
                         >
                             TRIGGER MANUAL RUN
                         </button>
                     </form>
+                    { 
+                        dashboard.manualRun.remaining == 0
+                            && <p className="light">There are no more manual runs left for today.</p>
+                        || dashboard.currentRun.state == "RUNNING"
+                            && <p className="light">There's already a test currently running.</p>
+                        || withinHourOfScheduledRun
+                            && <p className="light">You cannot start a manual run within 1 hour of a scheduled run.</p>
+                    }
                 </div>
                 <div className="nextRun">
                     <h3>Next Scheduled Run</h3>
@@ -230,7 +241,11 @@ const DashboardElement = ({ }: DashboardProps) => {
                                 placeholder="Email" 
                                 disabled={!useScheduledRunEmail} 
                             />
-                            <button className="submit" disabled={!useScheduledRunEmail}>
+                            <button 
+                                className="submit" 
+                                disabled={!useScheduledRunEmail}
+                                onClick={(e) => e.preventDefault()}
+                            >
                                 <SubmitArrow />
                             </button>
                         </div>

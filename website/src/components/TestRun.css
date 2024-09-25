@@ -37,10 +37,45 @@
     padding: 1rem;
     background-color: var(--white);
     border-radius: 16px;
+    overflow: scroll;
+}
+
+.test-run-data .data .view-more {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-family: var(--primary-font);
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    background-color: var(--primary);
+    color: var(--white);
+    border: 0 solid transparent;
+    border-radius: 16px;
+    transition: all .2s;
+    width: 100%;
+}
+
+.test-run-data .data .view-more:hover {
+    background-color: var(--primary-dark);
+    box-shadow: 0 3px 3px rgb(from var(--black) r g b / .5);
+    transform: translateY(-3px);
+    cursor: pointer;
+}
+
+.test-run-data .data .view-more:active {
+    cursor: initial;
+    transform: translateY(0);
+    box-shadow: none;
 }
 
 .overview {
     width: 100%;
+    height: fit-content;
+}
+
+.overview.loading {
+    min-height: fit-content;
+    height: 100%;
 }
 
 .overview h3 {
@@ -137,6 +172,10 @@
     height: fit-content;
 }
 
+.assets {
+    width: 100%;
+}
+
 .assets h3 {
     margin-bottom: 1rem;
 }
@@ -166,6 +205,10 @@
 
 .assets button:active {
     cursor: initial;
+}
+
+.assets a {
+    cursor: inherit;
 }
 
 .assets button svg path.bg {
