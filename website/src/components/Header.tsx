@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface HeaderProps {
     title: string;
-    onRefresh: () => void;
+    onRefresh: () => boolean;
     loading: boolean;
 }
 
@@ -19,8 +19,7 @@ export default function Header({ title, onRefresh, loading }: HeaderProps) {
                     title == "Content at a glance" && !loading && 
                     <button
                         onClick={() => {
-                            setTime(new Date().toString()); 
-                            onRefresh();
+                            if(onRefresh()) setTime(new Date().toString()); 
                         }}
                     >
                         <Refresh />

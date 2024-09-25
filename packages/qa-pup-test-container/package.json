@@ -2,7 +2,7 @@
   "name": "qa-pup-test-container",
   "author": "Kylan Duncan",
   "license": "ISC",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "scripts": {
     "build": "playwright install && tsc",
     "pretest": "npm run build && node scripts/prepare-test.js",

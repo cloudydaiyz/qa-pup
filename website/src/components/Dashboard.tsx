@@ -40,14 +40,75 @@ function getDurationString(duration: number) {
 }
 
 interface DashboardProps { 
-    dashboard: Dashboard
+    dashboard: Dashboard;
+    showNotification: (message: string) => void;
 }
 
-const DashboardElement = ({ dashboard }: DashboardProps) => {
+type FormName = "ManualRun" | "NextRun" | "UserEmail" | "CurrentRun";
+type EmailAction = "verify" | "check";
+
+const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
     const [ useManualRunEmail, setUseManualRunEmail ] = useState(false);
     const [ useScheduledRunEmail, setUseScheduledRunEmail ] = useState(false);
     const [ useCurrentRunEmail, setUseCurrentRunEmail ] = useState(false);
     const [ initiateEmailAction, setInitiateEmailAction ] = useState<"check"|"verify"|null>(null);
+
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const name = e.currentTarget.id as FormName;
+        const data = new FormData(e.currentTarget);
+        const headers = new Headers();
+        console.log(data.get("email-action"));
+
+        let body = {};
+        let url = "";
+        headers.append("Content-Type", "application/json");
+        
+        if(name == "UserEmail") {
+            const email = data.get("user-email") as string;
+            const action = data.get("email-action") as EmailAction;
+            
+            body = { email };
+            if(action == "check") url = "https://api.qa-pup.cloudydaiyz.com/check-email";
+            if(action == "verify") url = "https://api.qa-pup.cloudydaiyz.com/verify-email";
+        }
+
+        const options: RequestInit = {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(body),
+            redirect: "follow"
+        }
+        console.log(url, options);
+        fetch(url, options)
+            .then(res => {
+                if(res.status == 500) {
+                    showNotification("A failure occurred on the server side. Please try again later.");
+                } else if(!res.ok) {
+                    res.json().then(json => showNotification("An error occured. Message: " + json.message));
+                } else {
+                    res.json().then(json => {
+                        if(json.message) showNotification(json.message);
+                        if(json.verified != undefined) {
+                            json.verified
+                                ? showNotification("Your email has been verified.")
+                                : showNotification("Your email is not currently verified.");
+                        }
+                    })
+                }
+            })
+            .catch(e => { showNotification("An error occurred. Please try again later."); console.log(e)});
+    }
+
+    const handleFormInvalid = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const name = e.currentTarget.id as FormName;
+        let errorMessage = "Invalid input for the ";
+        if (name == "UserEmail") {
+            errorMessage += "email verification form. Please enter a valid email.";
+        }
+        showNotification(errorMessage);
+    }
 
     let tests = dashboard.latestTests.map((test, index) => (
         <div className="test" key={index}>
@@ -86,7 +147,7 @@ const DashboardElement = ({ dashboard }: DashboardProps) => {
                             <p className="light">
                                 started at {new Date(dashboard.currentRun.startTime!).toString()}
                             </p>
-                            <form>
+                            <form id="CurrentRun">
                                 <span>
                                     <input 
                                         type="checkbox" 
@@ -122,7 +183,7 @@ const DashboardElement = ({ dashboard }: DashboardProps) => {
                 <div className="user-email">
                     <h3>Email Verification</h3>
                     <p>In order to get notified on test completion from a manual or scheduled run, you must have a verified email.</p>
-                    <form>
+                    <form id="UserEmail" onSubmit={handleFormSubmit} onInvalid={handleFormInvalid}>
                         <legend>Select which action you want to take:</legend>
                         <span>
                             <input 
@@ -151,10 +212,10 @@ const DashboardElement = ({ dashboard }: DashboardProps) => {
                                 id="user-email" 
                                 placeholder="Email" 
                                 disabled={!initiateEmailAction}
+                                required
                             />
                         </div>
                         <button 
-                            onClick={(e) => e.preventDefault()}
                             disabled={!initiateEmailAction}
                         >
                             SUBMIT
@@ -175,7 +236,7 @@ const DashboardElement = ({ dashboard }: DashboardProps) => {
                         )
                     } until refresh
                     </p>
-                    <form>
+                    <form id="ManualRun">
                         <span>
                             <input 
                                 type="checkbox" 
@@ -223,7 +284,7 @@ const DashboardElement = ({ dashboard }: DashboardProps) => {
                     <p className="light">
                         at {new Date(dashboard.nextScheduledRun.startTime).toString()}
                     </p>
-                    <form>
+                    <form id="NextRun">
                         <span>
                             <input 
                                 type="checkbox" 

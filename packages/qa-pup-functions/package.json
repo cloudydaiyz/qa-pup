@@ -1,9 +1,9 @@
 {
-  "name": "@cloudydaiyz/qa-pup-aws-lambda",
+  "name": "@cloudydaiyz/qa-pup-functions",
   "author": "Kylan Duncan",
   "type": "module",
   "license": "ISC",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "scripts": {
     "build": "tsc && node scripts/rename-js-to-mjs.js"
   },

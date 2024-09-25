@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Download from "./svg/Download";
 import EditorControls from "./svg/EditorControls";
 import VisitArrow from "./svg/VisitArrow";
@@ -7,7 +7,7 @@ import { gruvboxDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import React from "react";
 import "./TestRun.css";
 
-import { TestAsset, TestMetadata, TestRunFile } from "@cloudydaiyz/qa-pup-types";
+import { PaginatedTestMetadata, TestAsset, TestMetadata, TestRunFile } from "@cloudydaiyz/qa-pup-types";
 import { sampleTestRunFile1, codeSample } from "../samples";
 import Loading from "./Loading";
 
@@ -19,9 +19,11 @@ interface OverviewProps {
         testsPassed: number,
     }
     metadata: TestMetadata[];
+    onNextPage: () => void;
+    loading: boolean;
 }
 
-const Overview = ({ overall, metadata }: OverviewProps) => {
+const Overview = ({ overall, metadata, onNextPage, loading }: OverviewProps) => {
     const tests = metadata.map((test, index) => (
         <React.Fragment key={index}>
             <h3>{(test.suiteName ? `${test.suiteName} => ` : "") + test.testName}</h3>
@@ -41,8 +43,6 @@ const Overview = ({ overall, metadata }: OverviewProps) => {
             </div>
         </React.Fragment>
     ));
-
-    const loading = false;
 
     return (
         <div className={`overview ${loading ? "loading" : ""}`}>
@@ -71,7 +71,13 @@ const Overview = ({ overall, metadata }: OverviewProps) => {
                     </React.Fragment>,
                     tests,
                     overall.testsRan != metadata.length 
-                        && <button key={-2} className="view-more">View More</button> 
+                        && <button 
+                                key={-2} 
+                                className="view-more"
+                                onClick={onNextPage}
+                            >
+                                View More
+                            </button> 
                 ] || 
                 <div className="loading-container type-2">
                     <Loading />
@@ -82,7 +88,8 @@ const Overview = ({ overall, metadata }: OverviewProps) => {
 }
 
 function getLineNumbers(sample: string) {
-    const numLines = sample != "" ? sample.split(/\n/).length - 1 : 0;
+    const split = sample.trim().split(/\n/);
+    const numLines = sample != "" ? split.length : 0;
     const lines = [...Array(numLines).keys()].map((num, i) => (
         <React.Fragment key={i}>
             {num+1}<br/>
@@ -92,18 +99,18 @@ function getLineNumbers(sample: string) {
 }
 
 interface CodeProps {
+    name: string;
     code: string;
+    loading: boolean;
 }
 
-const Code = ({ code }: CodeProps) => {
-
-    const loading = false;
+const Code = ({ name, code, loading }: CodeProps) => {
 
     return (
         !loading && <div className="code">
             <div className="code-header">
                 <EditorControls />
-                <p>index-test-ts</p>
+                <p>{name}</p>
             </div>
             <div className="code-body">
                 <div className="line-numbers">
@@ -141,9 +148,11 @@ interface AssetsProps {
     jsonReport: string;
     assets: TestAsset[];
     testsRan: number;
+    onNextPage: () => void;
+    loading: boolean;
 }
 
-const Assets = ({ htmlReport, jsonReport, assets, testsRan }: AssetsProps) => {
+const Assets = ({ htmlReport, jsonReport, assets, testsRan, onNextPage, loading }: AssetsProps) => {
 
     const assetElements = assets.map((asset, index) => (
         <span key={index}>
@@ -155,8 +164,6 @@ const Assets = ({ htmlReport, jsonReport, assets, testsRan }: AssetsProps) => {
             </button>
         </span>
     ));
-
-    const loading = false;
 
     return (
         !loading && <div className="assets">
@@ -179,7 +186,13 @@ const Assets = ({ htmlReport, jsonReport, assets, testsRan }: AssetsProps) => {
             <div className="asset-section">
                 {assetElements}
             </div>
-            { assets.length != testsRan && <button className="view-more">View More</button> }
+            { assets.length != testsRan && <button 
+                    className="view-more"
+                    onClick={onNextPage}
+                >
+                    View More
+                </button> 
+            }
         </div>
         || <div className="loading-container type-2">
             <Loading />
@@ -189,10 +202,27 @@ const Assets = ({ htmlReport, jsonReport, assets, testsRan }: AssetsProps) => {
 
 interface TestRunProps {
     testRunFile: TestRunFile;
+    updateTestRunFile: (testRunFile: TestRunFile) => void;
+    code: string;
 }
 
-const TestRun = ({ testRunFile }: TestRunProps) => {
+const TestRun = ({ testRunFile, updateTestRunFile, code }: TestRunProps) => {
     const [selectedTab, setSelectedTab] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    const nextPage = () => {
+        setLoading(true);
+        const newFile = {...testRunFile};
+        const nextPageLength = Math.min(10, newFile.testsRan - newFile.tests.length);
+        fetch(`https://api.qa-pup.cloudydaiyz.com/run/${newFile.id}/metadata?offset=${newFile.tests.length}&n=${nextPageLength}}`)
+            .then(res => res.json())
+            .then((metadata: PaginatedTestMetadata) => {
+                newFile.tests = newFile.tests.concat(metadata.metadata);
+                updateTestRunFile(newFile);
+            })
+            .catch(e => console.error(e))
+            .finally(() => setLoading(false));
+    }
     
     return (
     <div className="test-run-data">
@@ -210,13 +240,21 @@ const TestRun = ({ testRunFile }: TestRunProps) => {
                     testsPassed: testRunFile.testsPassed,
                 }}
                 metadata={testRunFile.tests}
+                onNextPage={nextPage}
+                loading={loading}
             />}
-            {selectedTab == 1 && <Code code={codeSample} />}
+            {selectedTab == 1 && <Code 
+                name={testRunFile.name.replace(/-spec-ts/, ".spec.ts")}
+                code={code == null ? codeSample : code} 
+                loading={code == null}
+            />}
             {selectedTab == 2 && <Assets 
                 htmlReport={testRunFile.reporters.htmlStaticUrl}
                 jsonReport={testRunFile.reporters.jsonObjectUrl}
                 assets={testRunFile.tests.map(test => test.assets).flat()}
                 testsRan={testRunFile.testsRan}
+                onNextPage={nextPage}
+                loading={loading}
             />}
         </div>
     </div>

@@ -8,10 +8,10 @@ export const sampleDashboard1: Dashboard = {
     manualRun: {
         remaining: 1,
         max: 3,
-        nextRefresh: "2024-09-25T13:00:00.000Z"
+        nextRefresh: "2024-09-26T13:00:00.000Z"
     },
     nextScheduledRun: {
-        startTime: "2024-09-25T13:00:00.000Z"
+        startTime: "2024-09-26T13:00:00.000Z"
     },
     currentRun: {
         state: "AT REST",
@@ -37,10 +37,10 @@ export const sampleDashboard2: Dashboard = {
     manualRun: {
         remaining: 2,
         max: 3,
-        nextRefresh: "2024-09-25T13:00:00.000Z"
+        nextRefresh: "2024-09-26T13:00:00.000Z"
     },
     nextScheduledRun: {
-        startTime: "2024-09-25T13:00:00.000Z"
+        startTime: "2024-09-26T13:00:00.000Z"
     },
     currentRun: {
         state: "RUNNING",
