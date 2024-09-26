@@ -8,12 +8,18 @@
 </h1>
 
 <p align="center">
-Small-scale, serverless clone of QA Wolf.
+Small-scale, serverless clone of QA Wolf, based on my previous <a href="https://github.com/cloudydaiyz/deep-interest-validator">Deep Interest Validator</a>.
 </p>
 
-<p align="center">
-This repository contains the frontend, backend, and infrastructure for the project.
-</p>
+## Directories
+
+- `/cloud`: Cloud configuration (IaC)
+
+- `/packages`: All npm (TypeScript) packages associated with the project, excluding the one for the frontend.
+
+- `/scripts`: Bash scripts to simplify development
+
+- `/website`: Frontend
 
 ## Limits
 
