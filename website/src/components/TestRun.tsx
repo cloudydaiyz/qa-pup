@@ -148,11 +148,12 @@ interface AssetsProps {
     jsonReport: string;
     assets: TestAsset[];
     testsRan: number;
+    testsDisplayed: number;
     onNextPage: () => void;
     loading: boolean;
 }
 
-const Assets = ({ htmlReport, jsonReport, assets, testsRan, onNextPage, loading }: AssetsProps) => {
+const Assets = ({ htmlReport, jsonReport, assets, testsRan, testsDisplayed, onNextPage, loading }: AssetsProps) => {
 
     const assetElements = assets.map((asset, index) => (
         <span key={index}>
@@ -186,7 +187,7 @@ const Assets = ({ htmlReport, jsonReport, assets, testsRan, onNextPage, loading 
             <div className="asset-section">
                 {assetElements}
             </div>
-            { assets.length != testsRan && <button 
+            { testsRan != testsDisplayed && <button 
                     className="view-more"
                     onClick={onNextPage}
                 >
@@ -253,6 +254,7 @@ const TestRun = ({ testRunFile, updateTestRunFile, code }: TestRunProps) => {
                 jsonReport={testRunFile.reporters.jsonObjectUrl}
                 assets={testRunFile.tests.map(test => test.assets).flat()}
                 testsRan={testRunFile.testsRan}
+                testsDisplayed={testRunFile.tests.length}
                 onNextPage={nextPage}
                 loading={loading}
             />}
