@@ -6,7 +6,7 @@
 
 # Run this to plan functions and/or lambda layer changes
 
-DIR="`pwd`/`dirname $0`"
+DIR=$(realpath `dirname $0`)
 
 source "$DIR/artifacts.sh"
 terraform plan -var-file=variables.tfvars

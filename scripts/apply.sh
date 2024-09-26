@@ -6,7 +6,7 @@
 
 # Run this to initialize functions and lambda layer, or to update functions 
 
-DIR="`pwd`/`dirname $0`"
+DIR=$(realpath `dirname $0`)
 
 source "$DIR/artifacts.sh"
 terraform apply -var-file=variables.tfvars --auto-approve

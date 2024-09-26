@@ -23,7 +23,7 @@ const testCompletionEmailTemplate = `
         
         <mj-image width="200px" src="https://raw.githubusercontent.com/cloudydaiyz/qa-pup/refs/heads/develop/assets/pups.png"></mj-image>
         <mj-text font-size="28px" align="center" color="#FF6600">The test run has completed</mj-text>
-        <mj-button background-color="#FF6600" font-size="18px"><a href="#" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
+        <mj-button background-color="#FF6600" font-size="18px"><a href="https://qa-pup.pages.dev" style="color: #FFFFFF; text-decoration: none;">View full results at QA Pup</a></mj-button>
         <mj-text align="center" font-size="18px"><i>The pups miss you!</i></mj-text>
         <mj-text>&nbsp;</mj-text>
         

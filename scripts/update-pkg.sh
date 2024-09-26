@@ -17,7 +17,7 @@
 # -f: update cloud functions
 # -w: update website
 
-DIR="`pwd`/`dirname $0`"
+DIR=$(realpath `dirname $0`)
 
 update_core() {
     npm un @cloudydaiyz/qa-pup-core

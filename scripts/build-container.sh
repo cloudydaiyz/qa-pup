@@ -2,7 +2,7 @@
 
 # Builds the container in /test-container
 
-CONTAINER_DIR="`pwd`/`dirname $0`/../packages/qa-pup-test-container"
+CONTAINER_DIR="$(realpath `dirname $0`)/../packages/qa-pup-test-container"
 cd $CONTAINER_DIR
 docker build -t qa-pup-test-container -f "${CONTAINER_DIR}/Dockerfile" $CONTAINER_DIR
 

@@ -3,7 +3,7 @@
 # Copies over the controllers and node_modules to the artifacts directory to prepare for deployment
 # Used by `apply.sh` and `plan.sh`
 
-DIR="`pwd`/`dirname $0`"
+DIR=$(realpath `dirname $0`)
 CLOUD_DIR="$DIR/../cloud"
 ARTIFACTS_DIR="$CLOUD_DIR/artifacts"
 FUNCTIONS_DIR="$DIR/../packages/qa-pup-functions"
