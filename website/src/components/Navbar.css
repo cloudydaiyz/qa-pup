@@ -52,3 +52,10 @@ li button:disabled {
     /* color: var(--primary); */
     color: var(--white);
 }
+
+@media (max-width: 600px) {
+    nav {
+        flex-basis: 0;
+        padding: 2rem;
+    }
+}

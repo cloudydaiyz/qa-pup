@@ -11,6 +11,18 @@ resource "aws_s3_bucket_public_access_block" "public_input_bucket" {
   restrict_public_buckets = false
 }
 
+resource "aws_s3_bucket_cors_configuration" "public_input_bucket" {
+  bucket = aws_s3_bucket.input_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET","POST"]
+    allowed_origins = ["http://localhost:5173","https://qa-pup.pages.dev"]
+    expose_headers  = []
+    max_age_seconds = 3000
+  }
+}
+
 resource "aws_s3_bucket_policy" "input_bucket_policy" {
   bucket = aws_s3_bucket.input_bucket.id
   policy = data.aws_iam_policy_document.input_bucket_policy.json

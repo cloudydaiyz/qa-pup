@@ -14,7 +14,8 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     const method = event.requestContext.httpMethod;
 
     const headers = {
-        "Access-Control-Allow-Origin": "http://localhost:5173",
+        "Access-Control-Allow-Origin": event.headers.origin == "http://localhost:5173" ?
+            "http://localhost:5173" : "https://qa-pup.pages.dev",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     };

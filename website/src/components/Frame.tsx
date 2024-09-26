@@ -78,12 +78,13 @@ export default function Frame() {
     }
 
     const resetDashboard = (e: Error) => {
-        generateToast("Failed to fetch dashboard data.");
+        generateToast("Failed to fetch dashboard data. Showing sample data.");
         console.log("Failed to fetch dashboard data. Error:")
         console.log(e);
 
         setDashboard(sampleDashboard1);
         setTestFiles([sampleTestRunFile1, sampleTestRunFile2]);
+        setLoading(false);
     }
 
     const getCodeFromFiles = (sourceFiles: TestRunFile[]) => {

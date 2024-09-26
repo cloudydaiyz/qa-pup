@@ -26,17 +26,17 @@ function getDurationString(duration: number) {
     let durationString = "";
     if (duration < 60000) {
         duration /= 1000;
-        durationString = ` second${duration != 1 ? "s" : ""}`;
+        durationString = " second";
     } else if (duration < 3600000) {
         duration /= 60000;
-        durationString = ` minute${duration != 1 ? "s" : ""}`;
+        durationString = " minute";
     } else {
         duration /= 3600000;
-        durationString = ` hour${duration != 1 ? "s" : ""}`;
+        durationString = " hour";
     }
 
     duration = Math.round(duration);
-    return duration + durationString;
+    return duration + durationString + (duration != 1 ? "s" : "");
 }
 
 interface DashboardProps { 

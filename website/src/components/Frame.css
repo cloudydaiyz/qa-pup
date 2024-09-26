@@ -88,3 +88,21 @@
         }
     }
 }
+
+/* @media (max-width: 900px) {
+    .frame {
+        overflow: scroll;
+    }
+} */
+
+@media (max-width: 600px) {
+    .frame {
+        flex-direction: column;
+        max-width: 100%;
+        max-height: none;
+    }
+
+    .container {
+        width: 100%;
+    }
+}

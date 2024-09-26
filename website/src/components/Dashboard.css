@@ -236,3 +236,31 @@
 {
     outline: none;
 }
+
+@media (max-width: 900px) {
+    .dashboard {
+        flex-direction: column;
+        padding-bottom: 2rem;
+        overflow-y: scroll;
+    }
+
+    .test-data {
+        width: 100%;
+        flex-basis: 100%;
+        overflow: initial;
+    }
+
+    .pups {
+        width: 100%;
+        flex-basis: 100%;
+        padding-right: 1rem;
+        margin-right: -1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .test-data, .pups {
+        padding-right: 0;
+        margin-right: 0;
+    }
+}

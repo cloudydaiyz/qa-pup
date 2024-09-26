@@ -9,7 +9,7 @@
 
 .test-run-data ul {
     display: flex;
-    /* border-bottom: 2px solid rgb(from var(--black) r g b / .5); */
+    max-width: 100%;
 }
 
 .test-run-data ul button {
@@ -98,6 +98,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    p {
+        text-align: right;
+    }
 }
 
 .data {
@@ -185,7 +189,6 @@
 
 .assets span {
     display: flex;
-    /* justify-content: space-between; */
     gap: 1rem;
     align-items: center;
 }
@@ -217,4 +220,19 @@
 
 .assets button:active svg path.bg {
     fill: rgb(from var(--black) r g b / .75);
+}
+
+@media (max-width: 600px) {
+    .test-run-data {
+        height: fit-content;
+        overflow: hidden;
+        ul {
+            overflow-x: scroll;
+            padding-bottom: 1rem;
+        }
+    }
+
+    .data {
+        height: fit-content;
+    }
 }
