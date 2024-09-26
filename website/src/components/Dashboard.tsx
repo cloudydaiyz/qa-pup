@@ -71,6 +71,21 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
             body = { email };
             if(action == "check") url = "https://api.qa-pup.cloudydaiyz.com/check-email";
             if(action == "verify") url = "https://api.qa-pup.cloudydaiyz.com/verify-email";
+        } else if(name == "ManualRun") {
+            const email = data.get("manual-run-email") as string;
+
+            if(email) body = { email };
+            url = "https://api.qa-pup.cloudydaiyz.com/manual-run";
+        } else if(name == "NextRun") {
+            const email = data.get("next-run-email") as string;
+
+            body = { email, current: false };
+            url = "https://api.qa-pup.cloudydaiyz.com/add-email";
+        } else if(name == "CurrentRun") {
+            const email = data.get("current-run-email") as string;
+
+            body = { email, current: true };
+            url = "https://api.qa-pup.cloudydaiyz.com/add-email"
         }
 
         const options: RequestInit = {
@@ -79,13 +94,12 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
             body: JSON.stringify(body),
             redirect: "follow"
         }
-        console.log(url, options);
         fetch(url, options)
             .then(res => {
                 if(res.status == 500) {
                     showNotification("A failure occurred on the server side. Please try again later.");
                 } else if(!res.ok) {
-                    res.json().then(json => showNotification("An error occured. Message: " + json.message));
+                    res.json().then(json => showNotification("Operation unsuccessful. Message: " + json.message));
                 } else {
                     res.json().then(json => {
                         if(json.message) showNotification(json.message);
@@ -106,6 +120,12 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
         let errorMessage = "Invalid input for the ";
         if (name == "UserEmail") {
             errorMessage += "email verification form. Please enter a valid email.";
+        } else if(name == "ManualRun") {
+            errorMessage += "manual run form. Please enter a valid email.";
+        } else if(name == "NextRun") {
+            errorMessage += "next run form. Please enter a valid email.";
+        } else if(name == "CurrentRun") {
+            errorMessage += "current run form. Please enter a valid email.";
         }
         showNotification(errorMessage);
     }
@@ -114,7 +134,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
         <div className="test" key={index}>
             <p>{test.name}</p>
             <div className="stats">
-                <p className="light">{test.duration / 1000}s</p>
+                <p className="light">{Math.round(test.duration) / 1000}s</p>
                 <p>{test.status}</p>
             </div>
         </div>
@@ -147,7 +167,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                             <p className="light">
                                 started at {new Date(dashboard.currentRun.startTime!).toString()}
                             </p>
-                            <form id="CurrentRun">
+                            <form id="CurrentRun" onSubmit={handleFormSubmit} onInvalid={handleFormInvalid}>
                                 <span>
                                     <input 
                                         type="checkbox" 
@@ -168,7 +188,6 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                                     <button 
                                         className="submit" 
                                         disabled={!useCurrentRunEmail}
-                                        onClick={(e) => e.preventDefault()}
                                     >
                                         <SubmitArrow />
                                     </button>
@@ -215,9 +234,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                                 required
                             />
                         </div>
-                        <button 
-                            disabled={!initiateEmailAction}
-                        >
+                        <button disabled={!initiateEmailAction}>
                             SUBMIT
                         </button>
                     </form>
@@ -236,7 +253,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                         )
                     } until refresh
                     </p>
-                    <form id="ManualRun">
+                    <form id="ManualRun" onSubmit={handleFormSubmit} onInvalid={handleFormInvalid}>
                         <span>
                             <input 
                                 type="checkbox" 
@@ -258,10 +275,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                                 disabled={!useManualRunEmail} 
                             />
                         </div>
-                        <button 
-                            disabled={cannotTriggerManualRun}
-                            onClick={(e) => e.preventDefault()}
-                        >
+                        <button disabled={cannotTriggerManualRun}>
                             TRIGGER MANUAL RUN
                         </button>
                     </form>
@@ -284,7 +298,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                     <p className="light">
                         at {new Date(dashboard.nextScheduledRun.startTime).toString()}
                     </p>
-                    <form id="NextRun">
+                    <form id="NextRun" onSubmit={handleFormSubmit} onInvalid={handleFormInvalid}>
                         <span>
                             <input 
                                 type="checkbox" 
@@ -302,11 +316,7 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
                                 placeholder="Email" 
                                 disabled={!useScheduledRunEmail} 
                             />
-                            <button 
-                                className="submit" 
-                                disabled={!useScheduledRunEmail}
-                                onClick={(e) => e.preventDefault()}
-                            >
+                            <button className="submit" disabled={!useScheduledRunEmail}>
                                 <SubmitArrow />
                             </button>
                         </div>

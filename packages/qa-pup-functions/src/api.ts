@@ -13,7 +13,14 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     const path = event.requestContext.resourcePath;
     const method = event.requestContext.httpMethod;
 
+    const headers = {
+        "Access-Control-Allow-Origin": "http://localhost:5173",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    };
     let body = JSON.stringify({ message: "Operation successful" });
+
+    if(method == "OPTIONS") return { statusCode: 200, body, headers };
     try {
         const dashboardPath = path == "/dashboard";
         const latestTestPath = path == "/run/{runId}/{name}";
@@ -76,18 +83,18 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
         } else {
 
             body = JSON.stringify({ message: "Resource not found" });
-            return { statusCode: 404, body };
+            return { statusCode: 404, headers, body };
         }
     } catch(e) {
         if(e instanceof PupError) {
             body = JSON.stringify({ message: e.message })
-            return { statusCode: 400, body };
+            return { statusCode: 400, headers, body };
         }
         
         body = "Encountered server error. Please try again later.";
         console.log(JSON.stringify({ message: (e as Error).message }));
-        return { statusCode: 500, body };
+        return { statusCode: 500, headers, body };
     }
 
-    return { statusCode: 200, body };
+    return { statusCode: 200, headers, body };
 }

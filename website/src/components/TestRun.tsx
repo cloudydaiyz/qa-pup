@@ -34,7 +34,7 @@ const Overview = ({ overall, metadata, onNextPage, loading }: OverviewProps) => 
                 </span>
                 <span>
                     <h4>Duration</h4>
-                    <p>{(Math.round(test.duration) / 1000) + "s"}</p>
+                    <p>{Math.round(test.duration) / 1000}s</p>
                 </span>
                 <span>
                     <h4>Status</h4>

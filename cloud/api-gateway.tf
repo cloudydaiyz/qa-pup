@@ -21,116 +21,69 @@ resource "aws_apigatewayv2_stage" "default" {
   auto_deploy = true
 }
 
-resource "aws_apigatewayv2_route" "get_dashboard_path" {
-  api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "GET /dashboard"
-
-  target = "integrations/${aws_apigatewayv2_integration.get_dashboard_path.id}"
-}
-
-resource "aws_apigatewayv2_integration" "get_dashboard_path" {
+resource "aws_apigatewayv2_integration" "api_lambda" {
   api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "AWS_PROXY"
   integration_method     = "POST"
   integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "GET /dashboard"
+  description            = "API for QA Pup"
   payload_format_version = "1.0"
+}
+
+resource "aws_apigatewayv2_route" "get_dashboard_path" {
+  for_each = toset([ "GET", "OPTIONS" ])
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "${each.key} /dashboard"
+
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "get_test_run" {
+  for_each = toset([ "GET", "OPTIONS" ])
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "GET /run/{runId}/{name}"
+  route_key = "${each.key} /run/{runId}/{name}"
 
-  target = "integrations/${aws_apigatewayv2_integration.get_test_run.id}"
-}
-
-resource "aws_apigatewayv2_integration" "get_test_run" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "GET /run/{runId}/{name}"
-  payload_format_version = "1.0"
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "get_test_run_metadata" {
+  for_each = toset([ "GET", "OPTIONS" ])
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "GET /run/{runFileId}/metadata"
+  route_key = "${each.key} /run/{runFileId}/metadata"
 
-  target = "integrations/${aws_apigatewayv2_integration.get_test_run_metadata.id}"
-}
-
-resource "aws_apigatewayv2_integration" "get_test_run_metadata" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "GET /run/{runFileId}/metadata"
-  payload_format_version = "1.0"
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "post_manual_run" {
+  for_each = toset([ "POST", "OPTIONS" ])
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /manual-run"
+  route_key = "${each.key} /manual-run"
 
-  target = "integrations/${aws_apigatewayv2_integration.post_manual_run.id}"
-}
-
-resource "aws_apigatewayv2_integration" "post_manual_run" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "POST /manual-run"
-  payload_format_version = "1.0"
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "post_check_email" {
+  for_each = toset([ "POST", "OPTIONS" ])
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /check-email"
+  route_key = "${each.key} /check-email"
 
-  target = "integrations/${aws_apigatewayv2_integration.post_check_email.id}"
-}
-
-resource "aws_apigatewayv2_integration" "post_check_email" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "POST /check-email"
-  payload_format_version = "1.0"
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "post_verify_email" {
+  for_each = toset([ "POST", "OPTIONS" ])
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /verify-email"
+  route_key = "${each.key} /verify-email"
 
-  target = "integrations/${aws_apigatewayv2_integration.post_verify_email.id}"
-}
-
-resource "aws_apigatewayv2_integration" "post_verify_email" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "POST /verify-email"
-  payload_format_version = "1.0"
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "post_add_email" {
+  for_each = toset([ "POST", "OPTIONS" ])
   api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /add-email"
+  route_key = "${each.key} /add-email"
 
-  target = "integrations/${aws_apigatewayv2_integration.post_add_email.id}"
-}
-
-resource "aws_apigatewayv2_integration" "post_add_email" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.api.invoke_arn
-  description            = "POST /add-email"
-  payload_format_version = "1.0"
+  target = "integrations/${aws_apigatewayv2_integration.api_lambda.id}"
 }
 
 # Domain name configuration

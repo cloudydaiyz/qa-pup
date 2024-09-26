@@ -13,4 +13,4 @@ docker run \
     -e MONGODB_USER="$MONGODB_USER" \
     -e MONGODB_PASS="$MONGODB_PASS" \
     -e RUN_ID="$RUN_ID" \
-    test-container
+    qa-pup-test-container

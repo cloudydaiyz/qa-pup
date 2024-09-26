@@ -2,7 +2,7 @@
 
 # Builds and runs the container in /test-container
 
-THIS_DIR="`pwd`/`dirname $0`"
+DIR="`pwd`/`dirname $0`"
 
-source "${THIS_DIR}/build-container.sh"
-source "${THIS_DIR}/run-container.sh"
+source "${DIR}/build-container.sh"
+source "${DIR}/run-container.sh"

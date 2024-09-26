@@ -32,11 +32,11 @@ update_types() {
 # Package directories
 CORE_DIR="$DIR/../packages/qa-pup-core"
 TYPES_DIR="$DIR/../packages/qa-pup-types"
+CONTAINER_DIR="$DIR/../packages/qa-pup-container"
+FUNCTIONS_DIR="$DIR/../packages/qa-pup-functions"
 
 # Dependency directories
-CONTAINER_DIR="$DIR/../container"
 TERRAFORM_DIR="$DIR/../cloud"
-FUNCTIONS_DIR="$DIR/../functions"
 WEBSITE_DIR="$DIR/../website"
 
 # Package update flags
