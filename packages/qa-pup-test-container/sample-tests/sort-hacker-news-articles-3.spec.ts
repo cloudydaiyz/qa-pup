@@ -13,10 +13,9 @@ interface TimeData {
  * Validates that EXACTLY the first `NUM_ARTICLES` articles on Hacker News 
  * are sorted from newest to oldest.
  *
- * Performs analysis as new pages are being found. Creates a new page for each
- * page of articles to analyze.
+ * Performs analysis as new pages are being found. Only uses a single page.
  */
-async function sortHackerNewsArticles(page: Page) {
+async function sortHackerNewsArticles3(page: Page) {
     console.log("sortHackerNewsArticles start");
 
     // Store the promises for analyzing each page
@@ -50,7 +49,6 @@ async function sortHackerNewsArticles(page: Page) {
             const link = await rows[rows.length - 1].getByRole("link");
             const nextPageLink = await link.getAttribute("href");
             expect(nextPageLink).not.toBeNull();
-            nextPage = await page.context().newPage();
             await nextPage.goto(`https://news.ycombinator.com/${nextPageLink!}`);
         }
     }
@@ -114,6 +112,6 @@ async function analyzeHackerNewsPage(rows, numArticles): Promise<TimeData> {
     return timeData;
 }
 
-test("run function 1", async ({ page }) => {
-    await sortHackerNewsArticles(page);
+test("run function 3", async ({ page }) => {
+    await sortHackerNewsArticles3(page);
 });

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.649.0",
+    "@axe-core/playwright": "^4.10.0",
     "@cloudydaiyz/qa-pup-core": "^2.7.0",
     "@cloudydaiyz/qa-pup-types": "^3.7.0",
     "mime-types": "^2.1.35"

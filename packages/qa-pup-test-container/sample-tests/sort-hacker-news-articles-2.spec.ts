@@ -11,70 +11,78 @@ interface TimeData {
 
 interface PageInfo {
     rows: Locator[]; // timestamp of the first article on the page
-    numArticles: number; // timestamp of the last article on the page
+    numNewArticles: number;
 }
 
 /**
  * Validates that EXACTLY the first `NUM_ARTICLES` articles on Hacker News 
  * are sorted from newest to oldest.
  *
- * Finds all pages, then performs an analysis on each page.
+ * Finds all pages, then performs an analysis on each page. Creates a new page for each
+ * page of articles to analyze.
  */
 async function sortHackerNewsArticles2(page: Page) {
     console.log("sortHackerNewsArticles2 start");
 
-    try {
-        // Store the info needed from each page to perform analysis
-        const pageInfo: PageInfo[] = [];
+    // Store the info needed from each page to perform analysis
+    const pageInfo: PageInfo[] = [];
 
-        let numArticles = 0;
-        let nextPage = page;
-        await nextPage.goto("https://news.ycombinator.com/newest");
+    let numArticles = 0;
+    let nextPage = page;
+    await nextPage.goto("https://news.ycombinator.com/newest");
 
-        while (numArticles < NUM_ARTICLES) {
-            // Calculate the number of articles to analyze on this page
-            const numNewArticles = Math.min(30, NUM_ARTICLES - numArticles);
-            numArticles += numNewArticles;
-
-            // Analyze the page asynchronously
-            const table = await nextPage.getByRole("table").nth(2);
-            const rows = await table.locator("tbody > tr").all();
-            pageInfo.push({ rows, numArticles });
-
-            // Get the next page if there's still articles left
-            if (numArticles < NUM_ARTICLES) {
-                const nextPageLink = await (
-                    await rows[rows.length - 1].getByRole("link")
-                ).getAttribute("href");
-                nextPage = await page.context().newPage();
-                await nextPage.goto(`https://news.ycombinator.com/${nextPageLink}`);
-            }
+    while (numArticles < NUM_ARTICLES) {
+        let fault = page.getByText("Sorry, we're not able to serve your requests this quickly.");
+        while(await fault.count() != 0) {
+            console.log("Faulty page. Reloading...");
+            await delay(1000).then(() => nextPage.reload());
+            fault = page.getByText("Sorry, we're not able to serve your requests this quickly.");
         }
 
-        // Store the promises for analyzing each page
-        const analysis: Promise<TimeData>[] = [];
-        pageInfo.forEach((info) => {
-            analysis.push(analyzeHackerNewsPage(info.rows, info.numArticles));
-        });
+        // Calculate the number of articles to analyze on this page
+        const numNewArticles = Math.min(30, NUM_ARTICLES - numArticles);
+        numArticles += numNewArticles;
 
-        // Ensure that the results for each successive page are in order
-        const results = await Promise.all(analysis);
-        results.forEach((result, i) => {
-            if (i < results.length - 1) {
-                expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);
-            }
-        });
+        // Analyze the page asynchronously
+        const table = await nextPage.getByRole("table").nth(2);
+        const rows = await table.locator("tbody > tr").all();
+        pageInfo.push({ rows, numNewArticles });
 
-        console.log(
-            "The first " + NUM_ARTICLES + " newest articles are sorted from newest to oldest!"
-        );
-    } catch(e) {
-        console.error(
-            "The first " + NUM_ARTICLES + " newest articles are NOT sorted from newest to oldest."
-        );
-        console.error("Error:");
-        console.error(e);
+        // Get the next page if there's still articles left
+        if (numArticles < NUM_ARTICLES) {
+            const link = await rows[rows.length - 1].getByRole("link");
+            const nextPageLink = await link.getAttribute("href");
+            nextPage = await page.context().newPage();
+            await nextPage.goto(`https://news.ycombinator.com/${nextPageLink}`);
+        }
     }
+
+    // Store the promises for analyzing each page
+    const analysis: Promise<TimeData>[] = [];
+    pageInfo.forEach((info) => {
+        analysis.push(analyzeHackerNewsPage(info.rows, info.numNewArticles));
+    });
+
+    // Ensure that the results for each successive page are in order
+    const results = await Promise.all(analysis);
+    results.forEach((result, i) => {
+        if (i < results.length - 1) {
+            expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);
+        }
+    });
+
+    console.log(
+        "The first " + NUM_ARTICLES + " newest articles are sorted from newest to oldest!"
+    );
+}
+
+/**
+ * Waits for `ms` milliseconds
+ * @param {number} ms The number of milliseconds to wait for
+ * @returns A promise to await for the delay to finish
+ */
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
