@@ -19,7 +19,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   account_id           = data.aws_caller_identity.current.account_id
-  container_image      = "cloudydaiyz/qa-pup-test-container:1.0.5"
+  container_image      = "cloudydaiyz/qa-pup-test-container:1.0.6"
   test_input_bucket    = "qa-pup-input"
   test_output_bucket   = "qa-pup-output"
   ecs_cluster          = "qa-pup-cluster"

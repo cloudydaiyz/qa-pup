@@ -29,7 +29,7 @@ async function sortHackerNewsArticles3(page: Page) {
 
     while (numArticles < NUM_ARTICLES) {
         let fault = page.getByText("Sorry, we're not able to serve your requests this quickly.");
-        while(await fault.count() != 0) {
+        while(fault && await fault.count() != 0) {
             console.log("Faulty page. Reloading...");
             await delay(1000).then(() => nextPage.reload());
             fault = page.getByText("Sorry, we're not able to serve your requests this quickly.");
