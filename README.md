@@ -8,7 +8,7 @@
 </h1>
 
 <p align="center">
-Small-scale, serverless clone of QA Wolf, based on my previous <a href="https://github.com/cloudydaiyz/deep-interest-validator">Deep Interest Validator</a>.
+Small-scale, serverless QA testing, based on my previous <a href="https://github.com/cloudydaiyz/deep-interest-validator">Deep Interest Validator</a>.
 </p>
 
 ## Directories
