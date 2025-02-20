@@ -68,6 +68,8 @@ export default function Frame() {
     const [toasts, dispatchToasts] = useReducer(updateToast, []);
     const tabs = files.map(file => file.name);
 
+    console.log(import.meta.env.VITE_SOME_KEY);
+
     const generateToast = (message: string) => {
         dispatchToasts({ 
             type: "add", 
