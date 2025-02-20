@@ -4,7 +4,7 @@ import DashboardElement from "./Dashboard";
 import TestRun from "./TestRun";
 import { Dispatch, useEffect, useReducer, useState } from "react";
 import "./Frame.css";
-import { sampleDashboard1, sampleDashboard2, sampleTestRunFile1, sampleTestRunFile2 } from "../samples";
+import { sampleDashboard1, sampleTestRunFile1, sampleTestRunFile2 } from "../samples";
 import Loading from "./Loading";
 import Cancel from "./svg/Cancel";
 import { Dashboard, TestRunFile } from "@cloudydaiyz/qa-pup-types";
@@ -90,6 +90,8 @@ export default function Frame() {
     const getCodeFromFiles = (sourceFiles: TestRunFile[]) => {
         console.log("getting code from the following files:");
         console.log(sourceFiles);
+
+        // TODO
         return Promise.all(
             sourceFiles.map(testRunFile => {
                 return fetch(testRunFile.sourceObjectUrl)
@@ -119,6 +121,7 @@ export default function Frame() {
         setTestFiles([]);
         setLoading(true);
 
+        // TODO
         fetch("https://api.qa-pup.cloudydaiyz.com/dashboard")
             .then(res => res.json())
             .then((json: Dashboard) => {

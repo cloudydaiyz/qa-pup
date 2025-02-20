@@ -94,6 +94,8 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
             body: JSON.stringify(body),
             redirect: "follow"
         }
+
+        // TODO
         fetch(url, options)
             .then(res => {
                 if(res.status == 500) {

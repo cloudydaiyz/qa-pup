@@ -1,0 +1,336 @@
+{
+  "config": {
+    "configFile": "/app/playwright.config.ts",
+    "rootDir": "/app/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 10,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-report/test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.47.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "sort-hacker-news-articles-3.spec.ts",
+      "file": "sort-hacker-news-articles-3.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "run function 3",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "status": "failed",
+                  "duration": 1158,
+                  "error": {
+                    "message": "Error: locator.all: Execution context was destroyed, most likely because of a navigation",
+                    "stack": "Error: locator.all: Execution context was destroyed, most likely because of a navigation\n    at analyzeHackerNewsPage (/app/tests/sort-hacker-news-articles-3.spec.ts:96:61)",
+                    "location": {
+                      "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                      "column": 61,
+                      "line": 96
+                    },
+                    "snippet": "  94 |\n  95 |         // Select the metadata\n> 96 |         const links = await metadata.locator(\"span:has(a)\").all();\n     |                                                             ^\n  97 |         if (links.length > 1) {\n  98 |             const time = await links[1].getAttribute(\"title\");\n  99 |             const timestamp = Date.parse(time);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                        "column": 61,
+                        "line": 96
+                      },
+                      "message": "Error: locator.all: Execution context was destroyed, most likely because of a navigation\n\n  94 |\n  95 |         // Select the metadata\n> 96 |         const links = await metadata.locator(\"span:has(a)\").all();\n     |                                                             ^\n  97 |         if (links.length > 1) {\n  98 |             const time = await links[1].getAttribute(\"title\");\n  99 |             const timestamp = Date.parse(time);\n\n    at analyzeHackerNewsPage (/app/tests/sort-hacker-news-articles-3.spec.ts:96:61)"
+                    },
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                        "column": 28,
+                        "line": 52
+                      },
+                      "message": "Error: page.goto: Test ended.\nCall log:\n  \u001b[2m- navigating to \"https://news.ycombinator.com/newest?next=43113876&n=31\", waiting until \"load\"\u001b[22m\n\n\n  50 |             const nextPageLink = await link.getAttribute(\"href\");\n  51 |             expect(nextPageLink).not.toBeNull();\n> 52 |             await nextPage.goto(`https://news.ycombinator.com/${nextPageLink!}`);\n     |                            ^\n  53 |         }\n  54 |     }\n  55 |\n\n    at sortHackerNewsArticles3 (/app/tests/sort-hacker-news-articles-3.spec.ts:52:28)\n    at /app/tests/sort-hacker-news-articles-3.spec.ts:116:5"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "sortHackerNewsArticles start\n"
+                    },
+                    {
+                      "text": "starting loop\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-02-20T13:01:41.557Z",
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-3-run-function-3-chromium/video.webm"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                    "column": 61,
+                    "line": 96
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a93d6bbf43bccbd37c24-dd4e768e04ba38b731ce",
+          "file": "sort-hacker-news-articles-3.spec.ts",
+          "line": 115,
+          "column": 5
+        },
+        {
+          "title": "run function 3",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "status": "failed",
+                  "duration": 4871,
+                  "error": {
+                    "message": "Error: locator.all: Execution context was destroyed, most likely because of a navigation",
+                    "stack": "Error: locator.all: Execution context was destroyed, most likely because of a navigation\n    at analyzeHackerNewsPage (/app/tests/sort-hacker-news-articles-3.spec.ts:96:61)",
+                    "location": {
+                      "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                      "column": 61,
+                      "line": 96
+                    },
+                    "snippet": "  94 |\n  95 |         // Select the metadata\n> 96 |         const links = await metadata.locator(\"span:has(a)\").all();\n     |                                                             ^\n  97 |         if (links.length > 1) {\n  98 |             const time = await links[1].getAttribute(\"title\");\n  99 |             const timestamp = Date.parse(time);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                        "column": 61,
+                        "line": 96
+                      },
+                      "message": "Error: locator.all: Execution context was destroyed, most likely because of a navigation\n\n  94 |\n  95 |         // Select the metadata\n> 96 |         const links = await metadata.locator(\"span:has(a)\").all();\n     |                                                             ^\n  97 |         if (links.length > 1) {\n  98 |             const time = await links[1].getAttribute(\"title\");\n  99 |             const timestamp = Date.parse(time);\n\n    at analyzeHackerNewsPage (/app/tests/sort-hacker-news-articles-3.spec.ts:96:61)"
+                    },
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                        "column": 36,
+                        "line": 32
+                      },
+                      "message": "Error: locator.count: Test ended.\n\n  30 |     while (numArticles < NUM_ARTICLES) {\n  31 |         let fault = page.getByText(\"Sorry, we're not able to serve your requests this quickly.\");\n> 32 |         while(fault && await fault.count() != 0) {\n     |                                    ^\n  33 |             console.log(\"Faulty page. Reloading...\");\n  34 |             await delay(1000).then(() => nextPage.reload());\n  35 |             fault = page.getByText(\"Sorry, we're not able to serve your requests this quickly.\");\n\n    at sortHackerNewsArticles3 (/app/tests/sort-hacker-news-articles-3.spec.ts:32:36)\n    at /app/tests/sort-hacker-news-articles-3.spec.ts:116:5"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "sortHackerNewsArticles start\n"
+                    },
+                    {
+                      "text": "starting loop\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-02-20T13:01:43.698Z",
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-3-run-function-3-firefox/video.webm"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                    "column": 61,
+                    "line": 96
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a93d6bbf43bccbd37c24-5fe5289a46489cf9972e",
+          "file": "sort-hacker-news-articles-3.spec.ts",
+          "line": 115,
+          "column": 5
+        },
+        {
+          "title": "run function 3",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "status": "failed",
+                  "duration": 3078,
+                  "error": {
+                    "message": "Error: locator.all: Execution context was destroyed, most likely because of a navigation",
+                    "stack": "Error: locator.all: Execution context was destroyed, most likely because of a navigation\n    at analyzeHackerNewsPage (/app/tests/sort-hacker-news-articles-3.spec.ts:96:61)",
+                    "location": {
+                      "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                      "column": 61,
+                      "line": 96
+                    },
+                    "snippet": "  94 |\n  95 |         // Select the metadata\n> 96 |         const links = await metadata.locator(\"span:has(a)\").all();\n     |                                                             ^\n  97 |         if (links.length > 1) {\n  98 |             const time = await links[1].getAttribute(\"title\");\n  99 |             const timestamp = Date.parse(time);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                        "column": 61,
+                        "line": 96
+                      },
+                      "message": "Error: locator.all: Execution context was destroyed, most likely because of a navigation\n\n  94 |\n  95 |         // Select the metadata\n> 96 |         const links = await metadata.locator(\"span:has(a)\").all();\n     |                                                             ^\n  97 |         if (links.length > 1) {\n  98 |             const time = await links[1].getAttribute(\"title\");\n  99 |             const timestamp = Date.parse(time);\n\n    at analyzeHackerNewsPage (/app/tests/sort-hacker-news-articles-3.spec.ts:96:61)"
+                    },
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                        "column": 28,
+                        "line": 52
+                      },
+                      "message": "Error: page.goto: Test ended.\nCall log:\n  \u001b[2m- navigating to \"https://news.ycombinator.com/newest?next=43113397&n=61\", waiting until \"load\"\u001b[22m\n\n\n  50 |             const nextPageLink = await link.getAttribute(\"href\");\n  51 |             expect(nextPageLink).not.toBeNull();\n> 52 |             await nextPage.goto(`https://news.ycombinator.com/${nextPageLink!}`);\n     |                            ^\n  53 |         }\n  54 |     }\n  55 |\n\n    at sortHackerNewsArticles3 (/app/tests/sort-hacker-news-articles-3.spec.ts:52:28)\n    at /app/tests/sort-hacker-news-articles-3.spec.ts:116:5"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "sortHackerNewsArticles start\n"
+                    },
+                    {
+                      "text": "starting loop\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-02-20T13:01:50.661Z",
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-3-run-function-3-webkit/video.webm"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/app/tests/sort-hacker-news-articles-3.spec.ts",
+                    "column": 61,
+                    "line": 96
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a93d6bbf43bccbd37c24-cc92c2f4e3c1985fba78",
+          "file": "sort-hacker-news-articles-3.spec.ts",
+          "line": 115,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-02-20T13:01:40.582Z",
+    "duration": 13987.637999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}
