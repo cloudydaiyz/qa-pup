@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import Navbar from "./Navbar";
 import Header from "./Header";
 import DashboardElement from "./Dashboard";
@@ -8,6 +10,7 @@ import { sampleDashboard1, sampleTestRunFile1, sampleTestRunFile2 } from "../sam
 import Loading from "./Loading";
 import Cancel from "./svg/Cancel";
 import { Dashboard, TestRunFile } from "@cloudydaiyz/qa-pup-types";
+import { defaultCode, defaultDashboard, testFiles } from "../default";
 
 // To limit the amount of refreshes that can be done in a certain time frame
 let refreshLeft = 3;
@@ -68,8 +71,6 @@ export default function Frame() {
     const [toasts, dispatchToasts] = useReducer(updateToast, []);
     const tabs = files.map(file => file.name);
 
-    console.log(import.meta.env.VITE_SOME_KEY);
-
     const generateToast = (message: string) => {
         dispatchToasts({ 
             type: "add", 
@@ -89,11 +90,10 @@ export default function Frame() {
         setLoading(false);
     }
 
-    const getCodeFromFiles = (sourceFiles: TestRunFile[]) => {
+    const getCodeFromFiles = async (sourceFiles: TestRunFile[]) => {
         console.log("getting code from the following files:");
         console.log(sourceFiles);
 
-        // TODO
         return Promise.all(
             sourceFiles.map(testRunFile => {
                 return fetch(testRunFile.sourceObjectUrl)
@@ -118,12 +118,20 @@ export default function Frame() {
     }
 
     const refreshDashboard = () => {
+        if(import.meta.env.VITE_APP_PAUSED == "1") {
+            generateToast("App is currently paused. Showing default data.");
+            setDashboard(defaultDashboard);
+            setTestFiles(testFiles);
+            setCode(defaultCode);
+            setLoading(false);
+            return;
+        }
+
         refreshLeft--;
         setSelectedTab(-1);
         setTestFiles([]);
         setLoading(true);
 
-        // TODO
         fetch("https://api.qa-pup.cloudydaiyz.com/dashboard")
             .then(res => res.json())
             .then((json: Dashboard) => {
@@ -154,6 +162,12 @@ export default function Frame() {
                         title={selectedTab == -1 ? "Content at a glance" : tabs[selectedTab]} 
                         onRefresh={
                             () => {
+                                if (import.meta.env.VITE_APP_PAUSED == "1") {
+                                    generateToast(
+                                        "App currently paused. This action has no effect."
+                                    );
+                                    return false;
+                                }
                                 const runRefresh = refreshLeft > 0;
                                 runRefresh
                                     ? refreshDashboard() 
