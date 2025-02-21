@@ -1,13 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import Navbar from "./Navbar";
 import Header from "./Header";
 import DashboardElement from "./Dashboard";
 import TestRun from "./TestRun";
 import { Dispatch, useEffect, useReducer, useState } from "react";
 import "./Frame.css";
-import { sampleDashboard1, sampleDashboard2, sampleTestRunFile1, sampleTestRunFile2 } from "../samples";
+import { sampleDashboard1, sampleTestRunFile1, sampleTestRunFile2 } from "../samples";
 import Loading from "./Loading";
 import Cancel from "./svg/Cancel";
 import { Dashboard, TestRunFile } from "@cloudydaiyz/qa-pup-types";
+import { defaultCode, defaultDashboard, testFiles } from "../default";
 
 // To limit the amount of refreshes that can be done in a certain time frame
 let refreshLeft = 3;
@@ -87,9 +90,10 @@ export default function Frame() {
         setLoading(false);
     }
 
-    const getCodeFromFiles = (sourceFiles: TestRunFile[]) => {
+    const getCodeFromFiles = async (sourceFiles: TestRunFile[]) => {
         console.log("getting code from the following files:");
         console.log(sourceFiles);
+
         return Promise.all(
             sourceFiles.map(testRunFile => {
                 return fetch(testRunFile.sourceObjectUrl)
@@ -114,6 +118,15 @@ export default function Frame() {
     }
 
     const refreshDashboard = () => {
+        if(import.meta.env.VITE_APP_PAUSED == "1") {
+            generateToast("App is currently paused. Showing default data.");
+            setDashboard(defaultDashboard);
+            setTestFiles(testFiles);
+            setCode(defaultCode);
+            setLoading(false);
+            return;
+        }
+
         refreshLeft--;
         setSelectedTab(-1);
         setTestFiles([]);
@@ -149,6 +162,12 @@ export default function Frame() {
                         title={selectedTab == -1 ? "Content at a glance" : tabs[selectedTab]} 
                         onRefresh={
                             () => {
+                                if (import.meta.env.VITE_APP_PAUSED == "1") {
+                                    generateToast(
+                                        "App currently paused. This action has no effect."
+                                    );
+                                    return false;
+                                }
                                 const runRefresh = refreshLeft > 0;
                                 runRefresh
                                     ? refreshDashboard() 

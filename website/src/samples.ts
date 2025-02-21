@@ -585,12 +585,3 @@ export function getMetadata(testRunFileId: string, offset: number, n: number): P
     const total = metadata.length;
     return { metadata, offset, n, total };
 }
-
-// Useful for the frontend
-async function readDataFromBucket() {
-    fetch(`https://test-output-bucket.s3.aws-region.amazonaws.com/qa-pup-example.spec.ts`)
-        .then(res => res.text())
-        .then(txt => console.log(txt));
-    
-    // use <a download="filename" href="s3link"> for downloading
-}

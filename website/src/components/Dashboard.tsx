@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import SubmitArrow from "./svg/SubmitArrow";
 import pups from "./../assets/pups.png";
 import bark from "./../assets/puppy-bark-2.mp3";
@@ -5,7 +6,6 @@ import howl from "./../assets/wolf-howl.mp3";
 import { useState } from "react";
 import "./Dashboard.css";
 
-import { sampleDashboard2 } from "../samples";
 import { Dashboard } from "@cloudydaiyz/qa-pup-types";
 
 const barkAudio = new Audio(bark);
@@ -55,6 +55,12 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
 
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if(import.meta.env.VITE_APP_PAUSED == "1") {
+            showNotification("App currently paused. This action has no effect.");
+            return;
+        }
+
         const name = e.currentTarget.id as FormName;
         const data = new FormData(e.currentTarget);
         const headers = new Headers();
@@ -94,6 +100,8 @@ const DashboardElement = ({ dashboard, showNotification }: DashboardProps) => {
             body: JSON.stringify(body),
             redirect: "follow"
         }
+
+        // TODO
         fetch(url, options)
             .then(res => {
                 if(res.status == 500) {

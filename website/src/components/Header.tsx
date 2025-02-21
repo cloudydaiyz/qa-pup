@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 export default function Header({ title, onRefresh, loading }: HeaderProps) {
-    const [time, setTime] = useState(new Date().toString());
+    const [time, setTime] = useState(import.meta.env.VITE_APP_PAUSED == "1" ? new Date("2025-02-20T13:00:37.992Z").toString() : new Date().toString());
 
     return (
         <div className="header">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Download from "./svg/Download";
 import EditorControls from "./svg/EditorControls";
 import VisitArrow from "./svg/VisitArrow";
@@ -8,7 +8,7 @@ import React from "react";
 import "./TestRun.css";
 
 import { PaginatedTestMetadata, TestAsset, TestMetadata, TestRunFile } from "@cloudydaiyz/qa-pup-types";
-import { sampleTestRunFile1, codeSample } from "../samples";
+import { codeSample } from "../samples";
 import Loading from "./Loading";
 
 interface OverviewProps {

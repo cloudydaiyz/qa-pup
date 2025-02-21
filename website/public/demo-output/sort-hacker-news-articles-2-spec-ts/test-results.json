@@ -1,0 +1,348 @@
+{
+  "config": {
+    "configFile": "/app/playwright.config.ts",
+    "rootDir": "/app/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 10,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-report/test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.47.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "sort-hacker-news-articles-2.spec.ts",
+      "file": "sort-hacker-news-articles-2.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "run function 2",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "status": "failed",
+                  "duration": 6536,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m\n    at forEach (/app/tests/sort-hacker-news-articles-2.spec.ts:70:33)\n    at sortHackerNewsArticles2 (/app/tests/sort-hacker-news-articles-2.spec.ts:68:13)\n    at /app/tests/sort-hacker-news-articles-2.spec.ts:126:5",
+                    "location": {
+                      "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                      "column": 33,
+                      "line": 70
+                    },
+                    "snippet": "  68 |     results.forEach((result, i) => {\n  69 |         if (i < results.length - 1) {\n> 70 |             expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);\n     |                                 ^\n  71 |         }\n  72 |     });\n  73 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                        "column": 33,
+                        "line": 70
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m\n\n  68 |     results.forEach((result, i) => {\n  69 |         if (i < results.length - 1) {\n> 70 |             expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);\n     |                                 ^\n  71 |         }\n  72 |     });\n  73 |\n\n    at forEach (/app/tests/sort-hacker-news-articles-2.spec.ts:70:33)\n    at sortHackerNewsArticles2 (/app/tests/sort-hacker-news-articles-2.spec.ts:68:13)\n    at /app/tests/sort-hacker-news-articles-2.spec.ts:126:5"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "sortHackerNewsArticles2 start\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-02-20T13:01:41.061Z",
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-chromium/video.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-chromium/video-1.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-chromium/video-2.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-chromium/video-3.webm"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                    "column": 33,
+                    "line": 70
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9fa955098f5053a63fd3-b4ce16574f3c8e615707",
+          "file": "sort-hacker-news-articles-2.spec.ts",
+          "line": 125,
+          "column": 5
+        },
+        {
+          "title": "run function 2",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "status": "failed",
+                  "duration": 22036,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m\n    at forEach (/app/tests/sort-hacker-news-articles-2.spec.ts:70:33)\n    at sortHackerNewsArticles2 (/app/tests/sort-hacker-news-articles-2.spec.ts:68:13)\n    at /app/tests/sort-hacker-news-articles-2.spec.ts:126:5",
+                    "location": {
+                      "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                      "column": 33,
+                      "line": 70
+                    },
+                    "snippet": "  68 |     results.forEach((result, i) => {\n  69 |         if (i < results.length - 1) {\n> 70 |             expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);\n     |                                 ^\n  71 |         }\n  72 |     });\n  73 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                        "column": 33,
+                        "line": 70
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m\n\n  68 |     results.forEach((result, i) => {\n  69 |         if (i < results.length - 1) {\n> 70 |             expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);\n     |                                 ^\n  71 |         }\n  72 |     });\n  73 |\n\n    at forEach (/app/tests/sort-hacker-news-articles-2.spec.ts:70:33)\n    at sortHackerNewsArticles2 (/app/tests/sort-hacker-news-articles-2.spec.ts:68:13)\n    at /app/tests/sort-hacker-news-articles-2.spec.ts:126:5"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "sortHackerNewsArticles2 start\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-02-20T13:01:48.662Z",
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-firefox/video-1.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-firefox/video.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-firefox/video-3.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-firefox/video-2.webm"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                    "column": 33,
+                    "line": 70
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9fa955098f5053a63fd3-679170ac5bfa446e978a",
+          "file": "sort-hacker-news-articles-2.spec.ts",
+          "line": 125,
+          "column": 5
+        },
+        {
+          "title": "run function 2",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "status": "failed",
+                  "duration": 11894,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m\n    at forEach (/app/tests/sort-hacker-news-articles-2.spec.ts:70:33)\n    at sortHackerNewsArticles2 (/app/tests/sort-hacker-news-articles-2.spec.ts:68:13)\n    at /app/tests/sort-hacker-news-articles-2.spec.ts:126:5",
+                    "location": {
+                      "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                      "column": 33,
+                      "line": 70
+                    },
+                    "snippet": "  68 |     results.forEach((result, i) => {\n  69 |         if (i < results.length - 1) {\n> 70 |             expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);\n     |                                 ^\n  71 |         }\n  72 |     });\n  73 |"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                        "column": 33,
+                        "line": 70
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: >= \u001b[32mNaN\u001b[39m\nReceived:    \u001b[31mNaN\u001b[39m\n\n  68 |     results.forEach((result, i) => {\n  69 |         if (i < results.length - 1) {\n> 70 |             expect(result.last).toBeGreaterThanOrEqual(results[i + 1].first);\n     |                                 ^\n  71 |         }\n  72 |     });\n  73 |\n\n    at forEach (/app/tests/sort-hacker-news-articles-2.spec.ts:70:33)\n    at sortHackerNewsArticles2 (/app/tests/sort-hacker-news-articles-2.spec.ts:68:13)\n    at /app/tests/sort-hacker-news-articles-2.spec.ts:126:5"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "sortHackerNewsArticles2 start\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-02-20T13:02:12.689Z",
+                  "attachments": [
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-webkit/video.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-webkit/video-1.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-webkit/video-2.webm"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/app/test-results/sort-hacker-news-articles-2-run-function-2-webkit/video-3.webm"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/app/tests/sort-hacker-news-articles-2.spec.ts",
+                    "column": 33,
+                    "line": 70
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9fa955098f5053a63fd3-1c782c0f218dc62f470e",
+          "file": "sort-hacker-news-articles-2.spec.ts",
+          "line": 125,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-02-20T13:01:40.173Z",
+    "duration": 45142.837,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}
