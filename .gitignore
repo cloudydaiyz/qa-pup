@@ -8,6 +8,7 @@ secrets.sh
 controllers
 artifacts
 sandbox
+state.config
 
 # == Terraform ==
 

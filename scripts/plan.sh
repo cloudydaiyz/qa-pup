@@ -6,7 +6,8 @@
 
 # Run this to plan functions and/or lambda layer changes
 
-DIR=$(realpath `dirname $0`)
+# https://github.com/akshaykarle/terraform-provider-mongodbatlas/issues/12
+terraform -chdir="cloud" taint mongodbatlas_cluster.main_cluster
 
-source "$DIR/artifacts.sh"
-terraform plan -var-file=variables.tfvars
+terraform -chdir="cloud" plan \
+  -var-file="terraform.tfvars"

@@ -1,4 +1,9 @@
 terraform {
+  backend "s3" {
+    bucket = ""
+    key    = "terraform.tfstate"
+    region = ""
+  }
   required_providers {
     aws = {
       source  = "hashicorp/aws"

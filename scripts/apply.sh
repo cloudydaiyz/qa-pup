@@ -6,7 +6,9 @@
 
 # Run this to initialize functions and lambda layer, or to update functions 
 
-DIR=$(realpath `dirname $0`)
+# https://github.com/akshaykarle/terraform-provider-mongodbatlas/issues/12
+terraform -chdir="cloud" taint mongodbatlas_cluster.main_cluster
 
-source "$DIR/artifacts.sh"
-terraform apply -var-file=variables.tfvars --auto-approve
+terraform -chdir="cloud" apply \
+  -var-file="terraform.tfvars" \
+  --auto-approve
