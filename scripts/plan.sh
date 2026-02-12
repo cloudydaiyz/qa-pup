@@ -6,8 +6,5 @@
 
 # Run this to plan functions and/or lambda layer changes
 
-# https://github.com/akshaykarle/terraform-provider-mongodbatlas/issues/12
-terraform -chdir="cloud" taint mongodbatlas_cluster.main_cluster
-
 terraform -chdir="cloud" plan \
   -var-file="terraform.tfvars"

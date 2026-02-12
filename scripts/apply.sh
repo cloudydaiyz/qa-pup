@@ -6,9 +6,6 @@
 
 # Run this to initialize functions and lambda layer, or to update functions 
 
-# https://github.com/akshaykarle/terraform-provider-mongodbatlas/issues/12
-terraform -chdir="cloud" taint mongodbatlas_cluster.main_cluster
-
 terraform -chdir="cloud" apply \
   -var-file="terraform.tfvars" \
   --auto-approve

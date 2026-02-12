@@ -17,7 +17,7 @@ resource "aws_s3_bucket_cors_configuration" "public_input_bucket" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET","POST"]
-    allowed_origins = ["http://localhost:5173","https://qa-pup.pages.dev"]
+    allowed_origins = ["http://localhost:5173","https://qa-pup.pages.dev", "https://qa-pup.cloudydaiyz.com/"]
     expose_headers  = []
     max_age_seconds = 3000
   }
